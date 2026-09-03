@@ -1,7 +1,8 @@
 {
   "version": 2,
-  "rev": "seed",
+  "rev": "mtm2vdao",
   "updated": "2026-09-03",
+  "cdn": "",
   "items": [
     {
       "index": 0,
@@ -15,7 +16,21 @@
       "video": "media/lion.mp4",
       "w": 914,
       "h": 1280,
-      "q": 72
+      "q": 73
+    },
+    {
+      "index": 1,
+      "id": "itmtlwbijg",
+      "rev": "mtm2vdao",
+      "title": "זבולון",
+      "location": "אולם ראשי, קיר צפוני",
+      "date": "כ\"ט טבת התש\"מ",
+      "dedication": "הוקדש לעילוי נשמת זוהרה בת פריחה ע\"ה",
+      "image": "media/itmtlwbijg.jpg",
+      "video": "media/itmtlwbijg.mp4",
+      "w": 914,
+      "h": 1280,
+      "q": 74
     }
   ]
 }
