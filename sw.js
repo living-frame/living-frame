@@ -2,7 +2,7 @@
  * קליפים לא עוברים כאן: הם נשמרים כ־Blob ב־IndexedDB, כדי לא להסתבך
  * עם בקשות Range של הווידאו בספארי.
  */
-const CACHE = 'living-frame-1.0.3';
+const CACHE = 'living-frame-1.0.4';
 
 const SHELL = [
   './',

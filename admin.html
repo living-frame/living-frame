@@ -96,9 +96,31 @@ input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
 .flow{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
 .flow div{flex:1;min-width:150px;background:#100c17;border-radius:12px;padding:12px 14px;font-size:14px;color:#cdc2d6}
 .flow b{display:block;color:var(--gold);font-family:"Frank Ruhl Libre",serif;font-size:16px}
+
+.wrap{display:none}
+body.in .wrap{display:block}
+#gate{position:fixed;inset:0;z-index:100;background:radial-gradient(120% 80% at 50% 0%,#2a1f3a 0%,var(--ink) 60%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:28px;text-align:center}
+#gate img{width:104px;margin-bottom:4px}
+#gate h2{font-size:26px}
+#gate p{color:var(--dim);font-size:14px;max-width:32ch;margin:0}
+#gate input{max-width:300px;text-align:center}
+#gate button{background:var(--gold);color:#221703;border-color:var(--gold);margin-top:8px;padding:12px 34px;font-size:16px}
+#gerr{color:#f08d92;font-size:14px;min-height:1.2em}
 </style>
 </head>
 <body>
+
+<div id="gate">
+  <img src="./logo-dark.png" alt="לוגו בית הכנסת">
+  <h2>מסך גבאי</h2>
+  <p>הכניסה מוגבלת. הטוקן של גיטהאב שמור מוצפן ונפתח רק עם הסיסמה.</p>
+  <input id="gu" placeholder="שם משתמש" autocomplete="username">
+  <input id="gp" type="password" placeholder="סיסמה" autocomplete="current-password">
+  <button id="gbtn">כניסה</button>
+  <div id="gerr"></div>
+</div>
+
 <div class="wrap">
 
 <header>
@@ -106,7 +128,7 @@ input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
   <div>
     <h1>מסך גבאי</h1>
     <div class="sub">כל התוכן יושב בגיטהאב. המסך הזה כותב אליו.</div>
-    <div class="sub" style="color:#6f6480">גרסה 1.0.3 · יוצא ע״י אמיר כהן</div>
+    <div class="sub" style="color:#6f6480">גרסה 1.0.4 · נוצר ע״י אמיר כהן</div>
   </div>
   <div class="sp">
     <button class="small ghost" id="helpBtn">איך זה עובד</button>
@@ -154,6 +176,19 @@ input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
     <li><b>אחסון חיצוני</b> — Cloudflare R2, ‏Supabase Storage או Backblaze B2. כולם מאפשרים להגדיר CORS. ממלאים כתובת בסיס בהגדרות, או מדביקים קישור מלא לכל פריט בנפרד.</li>
   </ul>
   <p>לפני שמחפשים אחסון — כדאי לבדוק את משקל הסרטון. קליפ של 10 שניות ב-720 על 1280 צריך לשקול מגה עד שניים. אם הוא שוקל שישה, הוא פשוט מקודד בבזבזנות, והמסך יציע לך את שורת הדחיסה.</p>
+
+  <h3>אבטחה — מה מוגן ומה לא</h3>
+  <p>הדף הזה יושב באתר ציבורי, וכל מי שיודע את הכתובת יכול לפתוח אותו ולקרוא את הקוד. לכן חשוב להבין מה בדיוק מגן על מה:</p>
+  <ul>
+    <li><b>הסיסמה</b> חוסמת כניסה מזדמנת, אבל אינה סוד מוחלט — היא שמורה בקוד כטביעת אצבע חד־כיוונית.</li>
+    <li><b>הטוקן הוא הסוד האמיתי</b>, והוא נשמר מוצפן (AES-GCM עם מפתח שנגזר מהסיסמה). בלי הסיסמה אי אפשר להוציא אותו מהדפדפן ולהשתמש בו, גם למי שיש גישה למחשב.</li>
+    <li><b>המערכת ננעלת לבד</b> אחרי 30 דקות בלי פעילות.</li>
+    <li><b>ההרשאה מצומצמת</b>: הטוקן צריך להיות Fine-grained, לריפו הזה בלבד, עם Contents ותו לא. גם אם ידלוף, אי אפשר איתו להגיע לשום מקום אחר בחשבון.</li>
+    <li><b>הריפו ציבורי</b> — כל תמונה, סרטון ונוסח הקדשה גלויים לכל. אין להעלות לכאן דבר שאינו מיועד לפרסום.</li>
+    <li><b>אין איסוף מידע</b>: האפליקציה של המתפללים מבקשת רק גישה למצלמה, ואינה שולחת לשום מקום לא תמונות ולא נתונים.</li>
+  </ul>
+  <p>אם הסיסמה נחשפה: לבטל את הטוקן בגיטהאב (Settings → Developer settings), ליצור חדש, ולהחליף את טביעת האצבע בקוד. הפקודה ליצירת טביעה חדשה, בקונסולת הדפדפן:
+  <code style="display:block;direction:ltr;text-align:left;margin-top:6px">crypto.subtle.digest('SHA-256', new TextEncoder().encode('user:pass')).then(d=&gt;console.log([...new Uint8Array(d)].map(x=&gt;x.toString(16).padStart(2,'0')).join('')))</code></p>
 
   <h3>הטוקן</h3>
   <p>צריך Personal access token עם הרשאת Contents: write על הריפו. הוא נשמר בדפדפן הזה בלבד ונשלח רק לגיטהאב. במחשב משותף — למחוק אותו בסוף העבודה בכפתור שבהגדרות.</p>
@@ -259,7 +294,86 @@ const setBar = p => $('#bar').style.width = Math.max(0, Math.min(100, p)) + '%';
 /* ---------- הגדרות ---------- */
 const gh = { owner:'', repo:'', branch:'main', token:'' };
 const F = { owner:'#ghOwner', repo:'#ghRepo', branch:'#ghBranch', token:'#ghToken' };
-Object.keys(F).forEach(k => { const v = localStorage.getItem('gh_'+k); if (v){ gh[k]=v; $(F[k]).value=v; } });
+['owner','repo','branch'].forEach(k => { const v = localStorage.getItem('gh_'+k); if (v){ gh[k]=v; $(F[k]).value=v; } });
+
+/* ---------- כניסה ---------- *
+ * זו נעילה על הדלת, לא כספת: הדף כולו ציבורי וכל אחד יכול לקרוא את הקוד.
+ * מה שהיא באמת שומרת הוא הטוקן — הוא נשמר מוצפן (AES-GCM עם מפתח שנגזר
+ * מהסיסמה ב-PBKDF2), ובלי הסיסמה אי אפשר להוציא אותו מהדפדפן ולהשתמש בו.
+ */
+const AUTH = '9999a8e9e84d03b1600ead597f4d954282d2544d0893924329d8bbad164981f1';
+let SESSION_PW = null;
+
+const enc = new TextEncoder(), dec = new TextDecoder();
+const toB64u = b => btoa(String.fromCharCode(...new Uint8Array(b)));
+const fromB64u = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+
+async function sha256hex(t){
+  const d = await crypto.subtle.digest('SHA-256', enc.encode(t));
+  return [...new Uint8Array(d)].map(x => x.toString(16).padStart(2,'0')).join('');
+}
+async function keyFrom(pw, salt){
+  const km = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name:'PBKDF2', salt, iterations:250000, hash:'SHA-256' },
+    km, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+}
+async function sealToken(pw, text){
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, await keyFrom(pw, salt), enc.encode(text));
+  return JSON.stringify({ s: toB64u(salt), i: toB64u(iv), c: toB64u(ct) });
+}
+async function openToken(pw, blob){
+  const { s, i, c } = JSON.parse(blob);
+  const pt = await crypto.subtle.decrypt({ name:'AES-GCM', iv: fromB64u(i) },
+    await keyFrom(pw, fromB64u(s)), fromB64u(c));
+  return dec.decode(pt);
+}
+
+async function doLogin(){
+  const u = $('#gu').value.trim().toLowerCase(), pw = $('#gp').value;
+  $('#gerr').textContent = '';
+  if (!u || !pw) return;
+  if (!window.crypto || !crypto.subtle){
+    $('#gerr').textContent = 'צריך לפתוח את הדף בכתובת מאובטחת (https).'; return;
+  }
+  if (await sha256hex(u + ':' + pw) !== AUTH){
+    $('#gerr').textContent = 'שם משתמש או סיסמה שגויים.';
+    $('#gp').value = ''; return;
+  }
+  SESSION_PW = pw;
+  document.body.classList.add('in');
+  $('#gate').remove();
+
+  // שחזור הטוקן המוצפן, והעברה חד-פעמית של טוקן ישן ששמור בגלוי
+  const legacy = localStorage.getItem('gh_token');
+  if (legacy){
+    gh.token = legacy;
+    localStorage.setItem('gh_token_enc', await sealToken(SESSION_PW, legacy));
+    localStorage.removeItem('gh_token');
+  } else {
+    const box = localStorage.getItem('gh_token_enc');
+    if (box){
+      try { gh.token = await openToken(SESSION_PW, box); }
+      catch (e){ log('הטוקן השמור לא נפתח. יש להזין אותו מחדש.'); localStorage.removeItem('gh_token_enc'); }
+    }
+  }
+  if (gh.token) $('#ghToken').value = gh.token;
+
+  db = await openDB();
+  load();
+  if (!localStorage.getItem('seen')){ $('#help').classList.add('on'); localStorage.setItem('seen','1'); }
+  idleTimer();
+}
+$('#gbtn').addEventListener('click', doLogin);
+['#gu','#gp'].forEach(sel => $(sel).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
+
+/* נעילה אוטומטית אחרי 30 דקות בלי פעילות */
+let idleAt;
+function idleTimer(){
+  clearTimeout(idleAt);
+  idleAt = setTimeout(() => { SESSION_PW = null; gh.token = ''; location.reload(); }, 30*60*1000);
+}
+['click','keydown','pointerdown'].forEach(ev => window.addEventListener(ev, () => { if (SESSION_PW) idleTimer(); }));
 const connected = () => gh.owner && gh.repo && gh.token;
 
 const media = { mode: localStorage.getItem('media_mode') || 'pages',
@@ -286,7 +400,10 @@ const rawBase = () => `https://raw.githubusercontent.com/${gh.owner}/${gh.repo}/
 const base = () => (gh.owner && gh.repo) ? rawBase() : './';
 
 $('#ghSave').addEventListener('click', async () => {
-  Object.keys(F).forEach(k => { gh[k] = $(F[k]).value.trim(); localStorage.setItem('gh_'+k, gh[k]); });
+  ['owner','repo','branch'].forEach(k => { gh[k] = $(F[k]).value.trim(); localStorage.setItem('gh_'+k, gh[k]); });
+  gh.token = $('#ghToken').value.trim();
+  localStorage.removeItem('gh_token');                       // אף פעם לא בגלוי
+  if (gh.token && SESSION_PW) localStorage.setItem('gh_token_enc', await sealToken(SESSION_PW, gh.token));
   $('#conn').innerHTML = '';
   if (!connected()){ $('#conn').innerHTML = '<div class="msg warn">חסרים פרטים. בלי טוקן אפשר רק לצפות.</div>'; return; }
   try {
@@ -298,7 +415,8 @@ $('#ghSave').addEventListener('click', async () => {
   } catch (e){ $('#conn').innerHTML = `<div class="msg bad">${esc(e.message)}</div>`; }
 });
 $('#ghForget').addEventListener('click', () => {
-  localStorage.removeItem('gh_token'); gh.token = ''; $('#ghToken').value = '';
+  localStorage.removeItem('gh_token'); localStorage.removeItem('gh_token_enc');
+  gh.token = ''; $('#ghToken').value = '';
   $('#conn').innerHTML = '<div class="msg info">הטוקן נמחק מהדפדפן.</div>';
 });
 const ghHeaders = () => ({ Authorization: 'Bearer ' + gh.token, Accept: 'application/vnd.github+json',
@@ -646,7 +764,7 @@ $('#pubBtn').addEventListener('click', async () => {
 $('#helpBtn').addEventListener('click', () => $('#help').classList.toggle('on'));
 window.addEventListener('beforeunload', e => { if (dirty){ e.preventDefault(); e.returnValue = ''; } });
 
-openDB().then(d => { db = d; load(); if (!localStorage.getItem('seen')){ $('#help').classList.add('on'); localStorage.setItem('seen','1'); } });
+$('#gu').focus();
 </script>
 </body>
 </html>
