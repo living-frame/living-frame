@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "rev": "mtm48685",
+  "rev": "mtm6f251",
   "updated": "2026-09-03",
   "cdn": "",
   "items": [
@@ -45,6 +45,20 @@
       "w": 914,
       "h": 1280,
       "q": 75
+    },
+    {
+      "index": 3,
+      "id": "itmtm6ezwz",
+      "rev": "mtm6f251",
+      "title": "לוי",
+      "location": "אולם ראשי - קיר דרומי",
+      "date": "",
+      "dedication": "הוקדש לשפע, ברכה, הצלחה ורפואה שלמה למשפחות כהן זדה",
+      "image": "media/itmtm6ezwz.jpg",
+      "video": "media/itmtm6ezwz.mp4",
+      "w": 914,
+      "h": 1280,
+      "q": 59
     }
   ]
 }
