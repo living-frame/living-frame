@@ -3,9 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>מסגרת חיה</title>
+<title>מסגרת חיה — בית הכנסת הרומני, גדרה</title>
+<meta name="description" content="בית הכנסת הרומני - תמונות מספרות. מכוונים את הטלפון לתמונה על הקיר, וההנפשה נפתחת בתוך המסגרת.">
 <link rel="manifest" href="./app.webmanifest">
 <meta name="theme-color" content="#17111f">
+
+<!-- תצוגה מקדימה בוואטסאפ, פייסבוק וטלגרם. הכתובות חייבות להיות מלאות ולא יחסיות. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="בית הכנסת הרומני, גדרה">
+<meta property="og:title" content="מסגרת חיה">
+<meta property="og:description" content="בית הכנסת הרומני - תמונות מספרות">
+<meta property="og:url" content="https://living-frame.github.io/living-frame/">
+<meta property="og:image" content="https://living-frame.github.io/living-frame/og.jpg">
+<meta property="og:image:secure_url" content="https://living-frame.github.io/living-frame/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="מסגרת חיה — בית הכנסת הרומני, גדרה">
+<meta property="og:locale" content="he_IL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="מסגרת חיה">
+<meta name="twitter:description" content="בית הכנסת הרומני - תמונות מספרות">
+<meta name="twitter:image" content="https://living-frame.github.io/living-frame/og.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
 <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -30,6 +49,12 @@ a-scene{position:fixed;inset:0}
   border-radius:12px;padding:10px 20px;font-family:"Assistant";font-size:14.5px;font-weight:600}
 #err{color:#f3a273;font-size:14px;margin-top:14px;max-width:32ch;min-height:1.2em}
 #count{font-size:13px;color:#8d8194;margin-top:18px}
+#topline{position:absolute;top:calc(14px + env(safe-area-inset-top));left:0;right:0;text-align:center;
+  font-size:12px;color:#6f6480;letter-spacing:.04em}
+#credit{font-size:12.5px;color:#6f6480;margin-top:6px}
+#house{font-family:"Frank Ruhl Libre",serif;font-size:15.5px;line-height:1.5;max-width:29ch;margin:14px auto 0;
+  background:linear-gradient(100deg,#8d6516 0%,#d6a22e 22%,#f3dd9a 48%,#d6a22e 72%,#8d6516 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
 
 #hud{position:fixed;inset:0;z-index:20;pointer-events:none;display:none}
 #top{position:absolute;top:0;left:0;right:0;padding:calc(14px + env(safe-area-inset-top)) 14px 14px;
@@ -64,13 +89,16 @@ a-scene{position:fixed;inset:0}
 <body>
 
 <div id="start">
-  <img src="./logo.png" alt="לוגו בית הכנסת">
+  <div id="topline">מסגרת חיה · גרסה 1.0.0</div>
+  <img src="./logo-dark.png" alt="לוגו בית הכנסת">
   <h1>מסגרת חיה</h1>
+  <div id="house">בית הכנסת הרומני, ע״ש הרב אברהם מתתיהו הצדיק משטפנישט — תמונות מספרות</div>
   <p>כוונו את הטלפון לתמונה על הקיר. ההנפשה תיפתח בתוך המסגרת ותישאר צמודה אליה.</p>
   <button id="go" disabled>טוען…</button>
   <button id="prefetch" style="display:none">שמירת כל ההנפשות במכשיר</button>
   <div id="err"></div>
   <div id="count"></div>
+  <div id="credit">יוצא ע״י אמיר כהן</div>
 </div>
 
 <div id="hud">
