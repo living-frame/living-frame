@@ -2,12 +2,13 @@
  * קליפים לא עוברים כאן: הם נשמרים כ־Blob ב־IndexedDB, כדי לא להסתבך
  * עם בקשות Range של הווידאו בספארי.
  */
-const CACHE = 'living-frame-v1';
+const CACHE = 'living-frame-1.0.2';
 
 const SHELL = [
   './',
   './index.html',
   './logo.png',
+  './logo-dark.png',
   'https://aframe.io/releases/1.5.0/aframe.min.js',
   'https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js'
 ];

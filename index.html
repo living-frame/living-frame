@@ -33,7 +33,13 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--ink);
   font-family:"Assistant",system-ui,sans-serif;color:var(--bone);-webkit-tap-highlight-color:transparent}
-a-scene{position:fixed;inset:0}
+/* מיכל אמיתי לסצנה: MindAR מודד לפיו את גודל התצוגה ותולה בו את וידאו המצלמה.
+   בלי זה הוא נופל על <body> ומקבל מידות שגויות, והתמונה יוצאת חתוכה או נעלמת. */
+#ar{position:fixed;inset:0;z-index:0;background:#000}
+#ar a-scene{position:absolute;inset:0;width:100%;height:100%}
+#ar video{z-index:0!important}
+#ar .a-canvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  z-index:1!important;background:transparent!important}
 #hidden{display:none}
 
 #start{position:fixed;inset:0;z-index:50;overflow:auto;
@@ -89,7 +95,7 @@ a-scene{position:fixed;inset:0}
 <body>
 
 <div id="start">
-  <div id="topline">מסגרת חיה · גרסה 1.0.0</div>
+  <div id="topline">מסגרת חיה · גרסה 1.0.2</div>
   <img src="./logo-dark.png" alt="לוגו בית הכנסת">
   <h1>מסגרת חיה</h1>
   <div id="house">בית הכנסת הרומני, ע״ש הרב אברהם מתתיהו הצדיק משטפנישט — תמונות מספרות</div>
@@ -127,6 +133,7 @@ a-scene{position:fixed;inset:0}
   <div class="line"><span id="sloc"></span><span id="sdate"></span></div>
 </div>
 
+<div id="ar"></div>
 <div id="hidden"></div>
 
 <script>
@@ -262,7 +269,7 @@ const vid = (i) => document.querySelector('#v' + i);
                fit-video="vid: #v${i}; ratio: ${ratio}"></a-video></a-entity>`;
   }).join('');
 
-  document.body.insertAdjacentHTML('beforeend',
+  $('#ar').insertAdjacentHTML('beforeend',
     `<a-scene id="scene"
       mindar-image="imageTargetSrc: ./targets.mind?v=${encodeURIComponent(manifestRev)}; autoStart: false;
                     uiScanning: no; uiLoading: no; uiError: no;
@@ -327,17 +334,33 @@ setInterval(() => {
 
 /* ---------- כפתורים ---------- */
 $('#go').addEventListener('click', async () => {
+  const btn = $('#go');
   $('#err').textContent = '';
+  btn.disabled = true; btn.textContent = 'מפעיל…';
   try {
+    // פתיחת ניגון וידאו בתוך מחוות המשתמש — רק אם כבר יש קובץ טעון,
+    // אחרת play() על וידאו בלי מקור נשאר תלוי ולא חוזר לעולם.
     const v0 = vid(0);
-    if (v0){ v0.muted = true; await v0.play().catch(()=>{}); v0.pause(); }  // פתיחת ניגון באייפון
-    await scene.systems['mindar-image-system'].start();
+    if (v0 && v0.src){
+      await Promise.race([ v0.play().catch(()=>{}), new Promise(r => setTimeout(r, 400)) ]);
+      v0.pause(); v0.currentTime = 0;
+    }
     $('#start').style.display = 'none';
     $('#hud').style.display = 'block';
+    await scene.systems['mindar-image-system'].start();
+    bumpResize();                      // מדידה מחדש אחרי שהפריסה התייצבה
   } catch (e) {
+    $('#start').style.display = 'flex';
+    $('#hud').style.display = 'none';
     $('#err').textContent = 'המצלמה לא נפתחה. צריך כתובת מאובטחת (https) ואישור גישה למצלמה. ' + (e && e.message ? e.message : '');
   }
+  btn.disabled = false; btn.textContent = 'פתיחת המצלמה';
 });
+
+function bumpResize(){
+  [120, 500, 1200].forEach(t => setTimeout(() => window.dispatchEvent(new Event('resize')), t));
+}
+window.addEventListener('orientationchange', bumpResize);
 
 $('#prefetch').addEventListener('click', async (e) => {
   const btn = e.target; btn.disabled = true;
