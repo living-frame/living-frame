@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>מסך גבאי — מסגרת חיה</title>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js"></script>
+<style>
+:root{
+  --ink:#17111f; --ink2:#241b31; --ink3:#2f2440; --line:#3b2e4a;
+  --bone:#f4efe4; --dim:#a89bb3; --gold:#d6a22e;
+  --green:#79b627; --orange:#f26a22; --red:#e51d26; --blue:#1d86c9;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--bone);font-family:"Assistant",system-ui,sans-serif;font-size:16px;line-height:1.6}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px 90px}
+h1,h2,h3{font-family:"Frank Ruhl Libre",Georgia,serif;margin:0;line-height:1.2}
+h1{font-size:30px;font-weight:900}
+h2{font-size:23px;font-weight:700;margin-bottom:4px}
+h3{font-size:18px;font-weight:700}
+a{color:var(--gold)}
+header{display:flex;align-items:center;gap:14px;padding:22px 0 10px;border-bottom:1px solid var(--line)}
+header img{width:54px}
+header .sub{font-size:13.5px;color:var(--dim)}
+header .sp{margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+section{padding:26px 0;border-bottom:1px solid var(--line)}
+.step{font-size:13px;color:var(--gold);font-family:"Frank Ruhl Libre",serif}
+.lead{color:#cdc2d6;font-weight:300;max-width:70ch;margin:.3em 0 0}
+
+button{font-family:"Assistant";font-weight:700;font-size:15px;border-radius:11px;border:1px solid var(--line);
+  background:var(--ink2);color:var(--bone);padding:10px 16px;cursor:pointer}
+button:hover{background:var(--ink3)}
+button.primary{background:var(--gold);color:#221703;border-color:var(--gold)}
+button.ghost{background:transparent}
+button:disabled{opacity:.45;cursor:default}
+.small{font-size:13px;padding:6px 11px;border-radius:9px}
+
+label{display:block;font-size:13px;color:var(--dim);margin:12px 0 4px}
+input,textarea{width:100%;background:var(--ink2);border:1px solid var(--line);border-radius:10px;
+  color:var(--bone);padding:10px 12px;font-family:"Assistant";font-size:15px}
+textarea{resize:vertical;min-height:64px}
+input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:18px}
+.cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media (max-width:780px){ .grid,.cols{grid-template-columns:1fr} }
+
+.drop{border:1.5px dashed #4a3a5c;border-radius:14px;padding:20px;text-align:center;color:var(--dim);
+  font-size:14px;cursor:pointer;background:var(--ink2)}
+.drop.hot{border-color:var(--gold);color:var(--bone)}
+.drop b{display:block;color:var(--bone);font-size:15.5px;margin-bottom:3px}
+.preview{margin-top:12px;display:none}
+.preview.on{display:block}
+.frame{position:relative;width:190px;border-radius:8px;overflow:hidden;background:#000;margin-inline:auto}
+.frame img,.frame video{width:100%;display:block}
+.frame .ov{position:absolute;inset:0}
+.frame .ov video{width:100%;height:100%;object-fit:cover}
+.meta{font-size:13px;color:var(--dim);text-align:center;margin-top:8px}
+
+.msg{border-radius:11px;padding:10px 13px;font-size:14px;margin-top:12px;border-inline-start:3px solid}
+.ok{background:rgba(121,182,39,.1);border-color:var(--green)}
+.warn{background:rgba(242,106,34,.1);border-color:var(--orange)}
+.bad{background:rgba(229,29,38,.1);border-color:var(--red)}
+.info{background:rgba(29,134,201,.1);border-color:var(--blue)}
+
+.item{background:var(--ink2);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:12px}
+.item.draft{border-color:var(--orange)}
+.item .head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.item .th{width:42px;height:58px;object-fit:cover;border-radius:6px;background:#3a2e4a;flex:0 0 auto}
+.item .nm{flex:1;min-width:140px}
+.item .nm b{display:block;font-size:16px}
+.item .nm small{font-size:12.5px;color:var(--dim)}
+.badge{font-size:11.5px;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.b-ok{background:rgba(121,182,39,.16);color:#a7d764}
+.b-mid{background:rgba(242,106,34,.16);color:#f3a273}
+.b-bad{background:rgba(229,29,38,.16);color:#f08d92}
+.b-none{background:#332843;color:var(--dim)}
+.b-new{background:rgba(242,106,34,.2);color:#f3a273}
+.item details{margin-top:10px}
+.item summary{font-size:13.5px;color:var(--dim);cursor:pointer}
+.ops{display:flex;gap:6px}
+
+.bar{height:8px;border-radius:99px;background:#332843;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--orange),var(--green));transition:width .3s}
+#log{background:#100c17;border:1px solid var(--line);border-radius:12px;padding:12px;
+  font-family:ui-monospace,monospace;font-size:12.5px;color:#b9adc4;max-height:220px;overflow:auto;margin-top:14px;white-space:pre-wrap}
+
+.help{background:var(--ink2);border-radius:16px;padding:20px 22px;margin-top:16px;display:none}
+.help.on{display:block}
+.help h3{margin:18px 0 4px;color:var(--gold)}
+.help h3:first-child{margin-top:0}
+.help p,.help li{font-size:15px;color:#cdc2d6;font-weight:300}
+.help ul{padding-inline-start:20px;margin:6px 0}
+.help code{background:#100c17;padding:1px 6px;border-radius:5px;font-size:13px;color:#e9d9b3}
+.flow{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
+.flow div{flex:1;min-width:150px;background:#100c17;border-radius:12px;padding:12px 14px;font-size:14px;color:#cdc2d6}
+.flow b{display:block;color:var(--gold);font-family:"Frank Ruhl Libre",serif;font-size:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <img src="./logo.png" alt="לוגו בית הכנסת">
+  <div>
+    <h1>מסך גבאי</h1>
+    <div class="sub">כל התוכן יושב בגיטהאב. המסך הזה כותב אליו.</div>
+  </div>
+  <div class="sp">
+    <button class="small ghost" id="helpBtn">איך זה עובד</button>
+    <button class="small ghost" id="reloadBtn">רענון מהמאגר</button>
+    <button class="small ghost" onclick="location.href='./index.html'">פתיחת האפליקציה</button>
+  </div>
+</header>
+
+<div class="help" id="help">
+  <h3>איפה יושב מה</h3>
+  <div class="flow">
+    <div><b>גיטהאב</b>המקור היחיד. התמונות, הסרטונים, קובץ המטרות ורשימת הפריטים.</div>
+    <div><b>המסך הזה</b>לא מחזיק מאגר משלו. קורא מגיטהאב, ובפרסום כותב לשם.</div>
+    <div><b>הטלפון</b>מוריד סרטון רק כשהתמונה שלו זוהתה בפעם הראשונה, ואז שומר אותו אצלו.</div>
+  </div>
+  <p>המשמעות: אפשר לעבוד מכל מחשב. מה שרואים כאן הוא מה שבאמת מפורסם, לא עותק מקומי.</p>
+
+  <h3>מה קורה בטלפון של המתפלל</h3>
+  <p>האפליקציה מורידה בפתיחה שני דברים קטנים בלבד: רשימת הפריטים וקובץ המטרות. הסרטונים לא יורדים מראש.</p>
+  <p>בפעם הראשונה שמתפלל מכוון לתמונה, הסרטון שלה יורד תוך כדי (מוצג פס התקדמות) ונשמר במכשיר. בכל פעם אחרת הוא נפתח מיידית, גם בלי אינטרנט. מי שרוצה, יכול ללחוץ במסך הפתיחה על "שמירת כל ההנפשות במכשיר" ולהוריד הכול מראש בבית.</p>
+  <p>כשמחליפים סרטון של פריט קיים, המספר <code>rev</code> שלו משתנה, והטלפון מוריד את החדש במקום להישאר עם הישן.</p>
+
+  <h3>מה צריך להכין לכל פריט</h3>
+  <ul>
+    <li><b>צילום התמונה כפי שהיא תלויה</b> — ישר מלפנים, בלי הקיר מסביב, בלי בוהק. זה מה שהמערכת מחפשת.</li>
+    <li><b>סרטון הנפשה</b> — באותו יחס גובה-רוחב, ורצוי שהפריים הראשון יהיה זהה לתמונה המודפסת.</li>
+  </ul>
+
+  <h3>מה עושה תמונה טובה לזיהוי</h3>
+  <ul>
+    <li>הרבה פרטים וקונטרסט — ציור, דיוקן, כיתוב מעוטר.</li>
+    <li>בלי חזרות וסימטריה מלאה: שורות טקסט זהות מבלבלות.</li>
+    <li>הציון שהמסך מציג הוא מספר נקודות העוגן. מעל 40 יציב, 20–40 גבולי, מתחת ל־20 לא לתלות על זה. תמונת האריה מקבלת 72.</li>
+  </ul>
+
+  <h3>למה הפרסום לוקח זמן</h3>
+  <p>כל התמונות נדחסות יחד לקובץ אחד, <code>targets.mind</code>. לכן בכל פרסום המסך מוריד את תמונות המקור מגיטהאב ובונה את הקובץ מחדש — כרבע דקה לתמונה. הסרטונים לא משתתפים בחישוב הזה, רק התמונות.</p>
+
+  <h3>איפה לאחסן את הסרטונים</h3>
+  <p>הכלל היחיד שקובע: השרת שמגיש את הסרטון חייב להחזיר כותרת <code>Access-Control-Allow-Origin</code>.
+  הסיבה — הווידאו נטען כטקסטורה של WebGL, ובלי הכותרת הדפדפן פוסל אותו. <b>וואן־דרייב, גוגל דרייב ודרופבוקס לא מחזירים אותה</b>, ולכן הם לא יעבדו כאן, גם אם הקישור נראה ישיר.</p>
+  <ul>
+    <li><b>גיטהאב Pages</b> — ברירת המחדל. מגבלת האתר היא ג׳יגה, ורוחב הפס 100 ג׳יגה בחודש. בסרטונים של מגה וחצי זה מאות פריטים ואלפי צפיות.</li>
+    <li><b>jsDelivr</b> — אותם קבצים בדיוק, מוגשים מרשת הפצה חינמית. מוריד עומס מגיטהאב. מגבלה: 20 מגה לקובץ.</li>
+    <li><b>אחסון חיצוני</b> — Cloudflare R2, ‏Supabase Storage או Backblaze B2. כולם מאפשרים להגדיר CORS. ממלאים כתובת בסיס בהגדרות, או מדביקים קישור מלא לכל פריט בנפרד.</li>
+  </ul>
+  <p>לפני שמחפשים אחסון — כדאי לבדוק את משקל הסרטון. קליפ של 10 שניות ב-720 על 1280 צריך לשקול מגה עד שניים. אם הוא שוקל שישה, הוא פשוט מקודד בבזבזנות, והמסך יציע לך את שורת הדחיסה.</p>
+
+  <h3>הטוקן</h3>
+  <p>צריך Personal access token עם הרשאת Contents: write על הריפו. הוא נשמר בדפדפן הזה בלבד ונשלח רק לגיטהאב. במחשב משותף — למחוק אותו בסוף העבודה בכפתור שבהגדרות.</p>
+</div>
+
+<section>
+  <div class="step">חיבור</div>
+  <h2>הריפו</h2>
+  <p class="lead">בלי זה המסך יכול רק להציג את מה שכבר מפורסם.</p>
+  <div class="cols" style="margin-top:12px">
+    <div><label for="ghOwner">שם משתמש בגיטהאב</label><input id="ghOwner" placeholder="amir"></div>
+    <div><label for="ghRepo">שם הריפו</label><input id="ghRepo" placeholder="living-frame"></div>
+    <div><label for="ghBranch">ענף</label><input id="ghBranch" value="main"></div>
+  </div>
+  <label for="ghToken">טוקן אישי (הרשאת Contents: write)</label>
+  <input id="ghToken" type="password" placeholder="ghp_…">
+  <label for="mediaMode">מאיפה הטלפונים ימשכו את הסרטונים</label>
+  <select id="mediaMode" style="width:100%;background:var(--ink2);border:1px solid var(--line);border-radius:10px;color:var(--bone);padding:10px 12px;font-family:Assistant;font-size:15px">
+    <option value="pages">מגיטהאב Pages — הכי פשוט, מתאים עד כ-100 סרטונים</option>
+    <option value="jsdelivr">דרך jsDelivr — אותם קבצים, רשת הפצה חינמית (עד 20 מגה לקובץ)</option>
+    <option value="custom">מאחסון חיצוני — כתובת בסיס משלי</option>
+  </select>
+  <div id="cdnWrap" style="display:none"><label for="cdnBase">כתובת הבסיס (חייבת להחזיר כותרת CORS פתוחה)</label>
+    <input id="cdnBase" placeholder="https://media.example.com/"></div>
+
+  <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+    <button id="ghSave">שמירה ובדיקת חיבור</button>
+    <button class="ghost small" id="ghForget">מחיקת הטוקן מהדפדפן</button>
+  </div>
+  <div id="conn"></div>
+</section>
+
+<section>
+  <div class="step">שלב א</div>
+  <h2>הוספת פריט</h2>
+  <p class="lead">שני קבצים ושורת פרטים. אפשר לגרור קבצים לתוך המלבנים.</p>
+
+  <div class="grid">
+    <div>
+      <div class="drop" id="dropImg"><b>תמונת המטרה</b>הקובץ שהמערכת תזהה על הקיר · JPG או PNG</div>
+      <input type="file" id="fileImg" accept="image/*" hidden>
+      <div class="preview" id="pvImg">
+        <div class="frame"><img id="imgEl" alt=""></div>
+        <div class="meta" id="imgMeta"></div>
+      </div>
+    </div>
+    <div>
+      <div class="drop" id="dropVid"><b>סרטון ההנפשה</b>MP4 · עד כ-8 מגה · באותו יחס כמו התמונה</div>
+      <input type="file" id="fileVid" accept="video/*" hidden>
+      <div class="preview" id="pvVid">
+        <div class="frame" id="vidFrame"><div class="ov"><video id="vidEl" muted loop playsinline></video></div></div>
+        <div class="meta" id="vidMeta"></div>
+      </div>
+    </div>
+  </div>
+
+  <label for="extVid">או קישור ישיר לסרטון שכבר מאוחסן במקום אחר (במקום להעלות קובץ)</label>
+  <input id="extVid" placeholder="https://…/clip.mp4">
+
+  <div id="check"></div>
+
+  <div class="cols">
+    <div><label for="title">שם התמונה</label><input id="title" placeholder="יהודה"></div>
+    <div><label for="loc">מיקום בבית הכנסת</label><input id="loc" placeholder="אולם ראשי, קיר מזרח"></div>
+    <div><label for="date">תאריך / יארצייט</label><input id="date" placeholder="כ׳ אדר תשע״ג"></div>
+  </div>
+  <label for="ded">נוסח ההקדשה</label>
+  <textarea id="ded" placeholder="הוקדש לעילוי נשמת…"></textarea>
+
+  <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+    <button class="primary" id="addBtn" disabled>הוספה לרשימה</button>
+    <button id="qualityBtn" disabled>בדיקת איכות זיהוי</button>
+    <button class="ghost" id="clearBtn">ניקוי הטופס</button>
+  </div>
+</section>
+
+<section>
+  <div class="step">שלב ב</div>
+  <h2>הפריטים</h2>
+  <p class="lead">הסדר כאן הוא הסדר בקובץ המטרות. פריט כתום עדיין לא נמצא בגיטהאב.</p>
+  <div id="list"></div>
+</section>
+
+<section>
+  <div class="step">שלב ג</div>
+  <h2>פרסום</h2>
+  <p class="lead">מעלה את הקבצים החדשים, בונה מחדש את קובץ המטרות מכל התמונות, וכותב את הרשימה. אחרי דקה-שתיים זה כבר בטלפונים.</p>
+  <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+    <button class="primary" id="pubBtn">פרסום לגיטהאב</button>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+  <div id="log">מוכן.</div>
+</section>
+
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const log = t => { const l = $('#log'); l.textContent += '\n' + t; l.scrollTop = l.scrollHeight; };
+const setBar = p => $('#bar').style.width = Math.max(0, Math.min(100, p)) + '%';
+
+/* ---------- הגדרות ---------- */
+const gh = { owner:'', repo:'', branch:'main', token:'' };
+const F = { owner:'#ghOwner', repo:'#ghRepo', branch:'#ghBranch', token:'#ghToken' };
+Object.keys(F).forEach(k => { const v = localStorage.getItem('gh_'+k); if (v){ gh[k]=v; $(F[k]).value=v; } });
+const connected = () => gh.owner && gh.repo && gh.token;
+
+const media = { mode: localStorage.getItem('media_mode') || 'pages',
+                custom: localStorage.getItem('media_custom') || '' };
+$('#mediaMode').value = media.mode;
+$('#cdnBase').value = media.custom;
+$('#cdnWrap').style.display = media.mode === 'custom' ? 'block' : 'none';
+$('#mediaMode').addEventListener('change', e => {
+  media.mode = e.target.value;
+  localStorage.setItem('media_mode', media.mode);
+  $('#cdnWrap').style.display = media.mode === 'custom' ? 'block' : 'none';
+});
+function cdnValue(){
+  if (media.mode === 'jsdelivr' && gh.owner && gh.repo)
+    return `https://cdn.jsdelivr.net/gh/${gh.owner}/${gh.repo}@${gh.branch}/`;
+  if (media.mode === 'custom'){
+    const v = $('#cdnBase').value.trim();
+    localStorage.setItem('media_custom', v); media.custom = v;
+    return v ? (v.endsWith('/') ? v : v + '/') : '';
+  }
+  return '';
+}
+const rawBase = () => `https://raw.githubusercontent.com/${gh.owner}/${gh.repo}/${gh.branch}/`;
+const base = () => (gh.owner && gh.repo) ? rawBase() : './';
+
+$('#ghSave').addEventListener('click', async () => {
+  Object.keys(F).forEach(k => { gh[k] = $(F[k]).value.trim(); localStorage.setItem('gh_'+k, gh[k]); });
+  $('#conn').innerHTML = '';
+  if (!connected()){ $('#conn').innerHTML = '<div class="msg warn">חסרים פרטים. בלי טוקן אפשר רק לצפות.</div>'; return; }
+  try {
+    const r = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}`, { headers: ghHeaders() });
+    if (!r.ok) throw new Error(r.status === 404 ? 'הריפו לא נמצא, או שלטוקן אין גישה אליו' : 'שגיאה ' + r.status);
+    const j = await r.json();
+    $('#conn').innerHTML = `<div class="msg ok">מחובר ל־${esc(j.full_name)}. ${j.private ? 'שים לב: ריפו פרטי — GitHub Pages החינמי לא יפרסם אותו.' : ''}</div>`;
+    load();
+  } catch (e){ $('#conn').innerHTML = `<div class="msg bad">${esc(e.message)}</div>`; }
+});
+$('#ghForget').addEventListener('click', () => {
+  localStorage.removeItem('gh_token'); gh.token = ''; $('#ghToken').value = '';
+  $('#conn').innerHTML = '<div class="msg info">הטוקן נמחק מהדפדפן.</div>';
+});
+const ghHeaders = () => ({ Authorization: 'Bearer ' + gh.token, Accept: 'application/vnd.github+json',
+                           'X-GitHub-Api-Version': '2022-11-28' });
+
+/* ---------- טיוטות מקומיות ---------- */
+let db;
+const openDB = () => new Promise((res, rej) => {
+  const r = indexedDB.open('living-frame-drafts', 1);
+  r.onupgradeneeded = () => r.result.createObjectStore('drafts', { keyPath:'id' });
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+});
+const store = m => db.transaction('drafts', m).objectStore('drafts');
+const putDraft = d => new Promise(r => { store('readwrite').put(d).onsuccess = r; });
+const delDraft = id => new Promise(r => { store('readwrite').delete(id).onsuccess = r; });
+const getDrafts = () => new Promise(r => { const q = store('readonly').getAll(); q.onsuccess = () => r(q.result); });
+
+/* ---------- מצב ---------- */
+let working = [];      // הרשימה המלאה לפי הסדר: פריטים מגיטהאב + טיוטות
+let removed = [];       // נתיבים למחיקה בפרסום הבא
+let dirty = false;
+
+async function readManifest(){
+  try {
+    if (connected()){
+      const r = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/manifest.json?ref=${gh.branch}`,
+                            { headers: ghHeaders(), cache:'no-store' });
+      if (r.status === 404) return { items: [] };
+      if (!r.ok) throw new Error('קריאה נכשלה: ' + r.status);
+      const j = await r.json();
+      const bytes = Uint8Array.from(atob(j.content.replace(/\n/g,'')), c => c.charCodeAt(0));
+      return JSON.parse(new TextDecoder('utf-8').decode(bytes));
+    }
+    const r = await fetch(base() + 'manifest.json?t=' + Date.now(), { cache:'no-store' });
+    if (!r.ok) return { items: [] };
+    return await r.json();
+  } catch (e){ log('לא הצלחתי לקרוא את הרשימה: ' + e.message); return { items: [] }; }
+}
+
+async function load(){
+  const m = await readManifest();
+  const drafts = await getDrafts();
+  working = (m.items || []).map(it => ({ ...it, source:'remote' }))
+    .concat(drafts.map(d => ({ ...d, source:'draft' })));
+  removed = []; dirty = false;
+  log(`נטענו ${(m.items||[]).length} פריטים מגיטהאב` + (drafts.length ? ` ועוד ${drafts.length} ממתינים לפרסום.` : '.'));
+  render();
+}
+$('#reloadBtn').addEventListener('click', () => {
+  if (dirty && !confirm('יש שינויים שלא פורסמו. לרענן בכל זאת?')) return;
+  load();
+});
+
+/* ---------- טופס ---------- */
+let imgFile = null, vidFile = null, imgDim = null, vidDim = null, vidDur = 0, lastQuality = null;
+
+function wireDrop(dropId, inputId, handler){
+  const d = $(dropId), i = $(inputId);
+  d.addEventListener('click', () => i.click());
+  d.addEventListener('dragover', e => { e.preventDefault(); d.classList.add('hot'); });
+  d.addEventListener('dragleave', () => d.classList.remove('hot'));
+  d.addEventListener('drop', e => { e.preventDefault(); d.classList.remove('hot'); if (e.dataTransfer.files[0]) handler(e.dataTransfer.files[0]); });
+  i.addEventListener('change', () => { if (i.files[0]) handler(i.files[0]); });
+}
+async function takeImage(f){
+  imgFile = f; lastQuality = null;
+  const img = $('#imgEl'); img.src = URL.createObjectURL(f);
+  await img.decode().catch(()=>{});
+  imgDim = { w: img.naturalWidth, h: img.naturalHeight };
+  $('#pvImg').classList.add('on');
+  $('#imgMeta').textContent = `${imgDim.w} × ${imgDim.h} · ${(f.size/1024).toFixed(0)} ק״ב`;
+  $('#vidFrame').style.aspectRatio = imgDim.w + ' / ' + imgDim.h;
+  if (!$('#title').value) $('#title').value = f.name.replace(/\.[^.]+$/, '');
+  validate();
+}
+async function takeVideo(f){
+  vidFile = f;
+  const v = $('#vidEl'); v.src = URL.createObjectURL(f);
+  await new Promise(r => { v.onloadedmetadata = r; });
+  vidDim = { w: v.videoWidth, h: v.videoHeight }; vidDur = v.duration;
+  v.play().catch(()=>{});
+  $('#pvVid').classList.add('on');
+  $('#vidMeta').textContent = `${vidDim.w} × ${vidDim.h} · ${vidDur.toFixed(1)} שניות · ${(f.size/1048576).toFixed(1)} מ״ב`;
+  validate();
+}
+wireDrop('#dropImg', '#fileImg', takeImage);
+wireDrop('#dropVid', '#fileVid', takeVideo);
+
+function validate(){
+  const c = $('#check'); c.innerHTML = '';
+  const add = (cls, html) => c.insertAdjacentHTML('beforeend', `<div class="msg ${cls}">${html}</div>`);
+  if (imgDim && Math.min(imgDim.w, imgDim.h) < 400)
+    add('warn', 'התמונה קטנה יחסית. מתחת ל-400 פיקסלים בצלע הקצרה הזיהוי נחלש.');
+  if (imgDim && vidDim){
+    const ri = imgDim.w/imgDim.h, rv = vidDim.w/vidDim.h, diff = Math.abs(ri-rv)/ri;
+    if (diff < 0.01) add('ok', 'יחס הסרטון תואם לתמונה. ההנפשה תשב בדיוק בתוך המסגרת.');
+    else {
+      const crop = rv > ri ? (1 - ri/rv) : (1 - rv/ri);
+      add('warn', `יחס הסרטון שונה מהתמונה. כדי למלא את המסגרת ייחתכו כ-${(crop*100).toFixed(0)}% מ${rv>ri?'הצדדים':'החלק העליון והתחתון'} של הסרטון. ` +
+        `התצוגה למעלה מראה מה יישאר. לייצוא מדויק: ${imgDim.w}×${imgDim.h}.`);
+    }
+  }
+  if (vidFile && vidFile.size > 2.5*1048576 && imgDim){
+    const mb = (vidFile.size/1048576).toFixed(1);
+    add('warn', `הסרטון שוקל ${mb} מגה — כמעט תמיד אפשר לרדת לשליש בלי הבדל נראה לעין. ` +
+      `שורה אחת בטרמינל:<br><code style="display:block;direction:ltr;text-align:left;margin-top:6px;background:#100c17;padding:8px;border-radius:8px;font-size:12.5px">` +
+      `ffmpeg -i in.mp4 -c:v libx264 -crf 26 -preset slow -vf scale=${imgDim.w}:${imgDim.h} -movflags +faststart -c:a aac -b:a 64k out.mp4</code>` +
+      `הסקייל גם מיישר את היחס לתמונה.`);
+  }
+  if (vidDur > 30) add('warn', 'הסרטון ארוך מ-30 שניות.');
+  const ext = $('#extVid').value.trim();
+  if (ext && !/^https:\/\//i.test(ext)) add('bad', 'הקישור חייב להתחיל ב-https, אחרת הדפדפן יחסום אותו.');
+  if (ext) add('info', 'שים לב: אחסון חיצוני חייב להחזיר Access-Control-Allow-Origin. וואן־דרייב, גוגל דרייב ודרופבוקס לא עושים את זה, והווידאו ייחסם כשהוא נטען כטקסטורה של AR.');
+  $('#addBtn').disabled = !(imgFile && (vidFile || ext));
+  $('#qualityBtn').disabled = !imgFile;
+}
+$('#extVid').addEventListener('input', validate);
+function resetForm(){
+  imgFile = vidFile = imgDim = vidDim = null; vidDur = 0; lastQuality = null;
+  ['#title','#loc','#date','#ded','#extVid'].forEach(s => $(s).value = '');
+  $('#pvImg').classList.remove('on'); $('#pvVid').classList.remove('on');
+  $('#check').innerHTML = ''; $('#addBtn').disabled = true; $('#qualityBtn').disabled = true;
+  $('#fileImg').value = ''; $('#fileVid').value = '';
+}
+$('#clearBtn').addEventListener('click', resetForm);
+
+/* ---------- הידור ---------- */
+const loadImg = blob => new Promise((res, rej) => {
+  const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(blob);
+});
+function compilerReady(){
+  if (window.MINDAR && window.MINDAR.IMAGE && window.MINDAR.IMAGE.Compiler) return true;
+  log('שגיאה: ספריית ההידור לא נטענה. צריך חיבור לאינטרנט.'); return false;
+}
+async function compile(images, onProgress){
+  const c = new window.MINDAR.IMAGE.Compiler();
+  const data = await c.compileImageTargets(images, onProgress);
+  return { buffer: c.exportData(), data };
+}
+const scoreOf = d => d.trackingData.reduce((s,t) => s + t.points.length, 0);
+function badge(q){
+  if (q == null) return '<span class="badge b-none">לא נבדק</span>';
+  if (q >= 40) return `<span class="badge b-ok">זיהוי טוב · ${q}</span>`;
+  if (q >= 20) return `<span class="badge b-mid">בינוני · ${q}</span>`;
+  return `<span class="badge b-bad">חלש · ${q}</span>`;
+}
+
+$('#qualityBtn').addEventListener('click', async () => {
+  if (!compilerReady()) return;
+  $('#qualityBtn').disabled = true; log('בודק את התמונה…'); setBar(2);
+  try {
+    const { data } = await compile([await loadImg(imgFile)], p => setBar(p));
+    const q = scoreOf(data[0]); lastQuality = q; setBar(100);
+    const cls = q >= 40 ? 'ok' : q >= 20 ? 'warn' : 'bad';
+    const txt = q >= 40 ? 'התמונה מתאימה. הזיהוי יהיה יציב.'
+      : q >= 20 ? 'גבולי. תעבוד מקרוב ובתאורה טובה, תתקשה מרחוק ובזווית.'
+      : 'חלשה מדי. שווה לצלם מחדש עם יותר פרטים בפריים, או לבחור תמונה אחרת.';
+    $('#check').insertAdjacentHTML('beforeend', `<div class="msg ${cls}">איכות זיהוי: ${q} נקודות עוגן. ${txt}</div>`);
+    log('איכות: ' + q);
+  } catch (e){ log('שגיאה בבדיקה: ' + e.message); }
+  $('#qualityBtn').disabled = false;
+});
+
+/* ---------- רשימה ---------- */
+$('#addBtn').addEventListener('click', async () => {
+  const id = 'it' + Date.now().toString(36);
+  const draft = {
+    id, title: $('#title').value.trim() || 'ללא שם', location: $('#loc').value.trim(),
+    date: $('#date').value.trim(), dedication: $('#ded').value.trim(),
+    w: imgDim.w, h: imgDim.h, q: lastQuality,
+    imgExt: imgFile.type.includes('png') ? 'png' : 'jpg',
+    imgBlob: imgFile, vidBlob: vidFile, extVideo: $('#extVid').value.trim() || null
+  };
+  await putDraft(draft);
+  working.push({ ...draft, source:'draft' });
+  dirty = true; resetForm(); render();
+  log('נוסף לרשימה. הפריט יגיע לטלפונים רק אחרי פרסום.');
+});
+
+function thumbURL(it){
+  return it.source === 'draft' ? URL.createObjectURL(it.imgBlob)
+                               : base() + it.image + '?t=' + (it.rev || '');
+}
+function render(){
+  const list = $('#list');
+  if (!working.length){ list.innerHTML = '<div class="msg info">אין פריטים. מוסיפים את הראשון למעלה.</div>'; return; }
+  list.innerHTML = '';
+  working.forEach((it, i) => {
+    const el = document.createElement('div');
+    el.className = 'item' + (it.source === 'draft' ? ' draft' : '');
+    el.innerHTML = `
+      <div class="head">
+        <img class="th" src="${thumbURL(it)}" alt="">
+        <div class="nm"><b>${i+1}. ${esc(it.title)}</b>
+          <small>${esc(it.location) || 'בלי מיקום'} · ${it.w}×${it.h}</small></div>
+        ${it.source === 'draft' ? '<span class="badge b-new">ממתין לפרסום</span>' : ''}
+        ${badge(it.q)}
+        <div class="ops">
+          <button class="small ghost" data-up="${i}" ${i===0?'disabled':''}>↑</button>
+          <button class="small ghost" data-down="${i}" ${i===working.length-1?'disabled':''}>↓</button>
+          <button class="small ghost" data-del="${i}">מחיקה</button>
+        </div>
+      </div>
+      <details>
+        <summary>עריכת פרטים</summary>
+        <div class="cols" style="margin-top:8px">
+          <div><label>שם</label><input data-f="title" data-i="${i}" value="${esc(it.title)}"></div>
+          <div><label>מיקום</label><input data-f="location" data-i="${i}" value="${esc(it.location)}"></div>
+          <div><label>תאריך</label><input data-f="date" data-i="${i}" value="${esc(it.date)}"></div>
+        </div>
+        <label>הקדשה</label>
+        <textarea data-f="dedication" data-i="${i}">${esc(it.dedication)}</textarea>
+      </details>`;
+    list.appendChild(el);
+  });
+
+  list.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    const i = +b.dataset.del, it = working[i];
+    if (!confirm(`למחוק את "${it.title}"?`)) return;
+    if (it.source === 'draft') await delDraft(it.id);
+    else { removed.push(it.image); if (!/^https?:/i.test(it.video)) removed.push(it.video); }
+    working.splice(i, 1); dirty = true; render();
+  });
+  list.querySelectorAll('[data-up]').forEach(b => b.onclick = () => swap(+b.dataset.up, -1));
+  list.querySelectorAll('[data-down]').forEach(b => b.onclick = () => swap(+b.dataset.down, +1));
+  list.querySelectorAll('[data-f]').forEach(inp => inp.onchange = async () => {
+    const it = working[+inp.dataset.i];
+    it[inp.dataset.f] = inp.value.trim();
+    if (it.source === 'draft') await putDraft(stripSource(it));
+    dirty = true;
+    $('#pubBtn').textContent = 'פרסום לגיטהאב (יש שינויים)';
+  });
+}
+const stripSource = it => { const c = { ...it }; delete c.source; return c; };
+function swap(i, dir){
+  const j = i + dir; if (j < 0 || j >= working.length) return;
+  [working[i], working[j]] = [working[j], working[i]];
+  dirty = true; render();
+}
+
+/* ---------- פרסום ---------- */
+const toB64 = blob => new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result.split(',')[1]); fr.readAsDataURL(blob); });
+
+async function ghPut(path, blob, message){
+  const url = `https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`;
+  let sha;
+  const cur = await fetch(`${url}?ref=${gh.branch}`, { headers: ghHeaders(), cache:'no-store' });
+  if (cur.ok) sha = (await cur.json()).sha;
+  const res = await fetch(url, { method:'PUT', headers: ghHeaders(),
+    body: JSON.stringify({ message, content: await toB64(blob), branch: gh.branch, sha }) });
+  if (!res.ok) throw new Error(path + ' — ' + res.status + ' ' + (await res.text()).slice(0,140));
+  log('  ✓ ' + path);
+}
+async function ghDelete(path){
+  const url = `https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`;
+  const cur = await fetch(`${url}?ref=${gh.branch}`, { headers: ghHeaders(), cache:'no-store' });
+  if (!cur.ok) return;
+  const sha = (await cur.json()).sha;
+  await fetch(url, { method:'DELETE', headers: ghHeaders(),
+    body: JSON.stringify({ message: 'הסרה: ' + path, sha, branch: gh.branch }) });
+  log('  ✗ ' + path);
+}
+
+$('#pubBtn').addEventListener('click', async () => {
+  if (!connected()){ log('צריך להתחבר לריפו קודם (חלק "הריפו" למעלה).'); return; }
+  if (!working.length){ log('אין מה לפרסם.'); return; }
+  if (!compilerReady()) return;
+  $('#pubBtn').disabled = true;
+  const rev = Date.now().toString(36);
+
+  try {
+    // 1. העלאת המדיה של הפריטים החדשים
+    const fresh = working.filter(it => it.source === 'draft');
+    if (fresh.length) log(`מעלה מדיה של ${fresh.length} פריטים חדשים…`);
+    for (const it of fresh){
+      await ghPut(`media/${it.id}.${it.imgExt}`, it.imgBlob, 'תמונה: ' + it.title);
+      it.image = `media/${it.id}.${it.imgExt}`;
+      if (it.extVideo){
+        it.video = it.extVideo;
+        log('  ↗ סרטון חיצוני: ' + it.extVideo);
+      } else {
+        await ghPut(`media/${it.id}.mp4`, it.vidBlob, 'הנפשה: ' + it.title);
+        it.video = `media/${it.id}.mp4`;
+      }
+      it.rev = rev;
+    }
+
+    // 2. איסוף כל תמונות המקור — החדשות מהמחשב, הקיימות מגיטהאב
+    log('אוסף תמונות מקור…');
+    const images = [];
+    for (const it of working){
+      if (it.source === 'draft') images.push(await loadImg(it.imgBlob));
+      else {
+        const r = await fetch(base() + it.image + '?t=' + Date.now(), { cache:'no-store' });
+        if (!r.ok) throw new Error('לא הצלחתי להוריד את ' + it.image);
+        images.push(await loadImg(await r.blob()));
+      }
+    }
+
+    // 3. בניית קובץ המטרות
+    log(`בונה קובץ מטרות מ-${images.length} תמונות. הערכה: ${Math.ceil(images.length*15)} שניות.`);
+    const { buffer, data } = await compile(images, p => setBar(p));
+    working.forEach((it, i) => it.q = scoreOf(data[i]));
+
+    // 4. רשימה + קובץ מטרות
+    const manifest = {
+      version: 2, rev, updated: new Date().toISOString().slice(0,10), cdn: cdnValue(),
+      items: working.map((it, i) => ({
+        index: i, id: it.id, rev: it.rev || rev, title: it.title, location: it.location,
+        date: it.date, dedication: it.dedication, image: it.image, video: it.video,
+        w: it.w, h: it.h, q: it.q
+      }))
+    };
+    await ghPut('targets.mind', new Blob([buffer]), 'מאגר מטרות ' + rev);
+    await ghPut('manifest.json', new Blob([JSON.stringify(manifest, null, 2)], { type:'application/json' }), 'רשימת פריטים ' + rev);
+
+    // 5. ניקוי
+    for (const p of removed) await ghDelete(p);
+    for (const it of fresh) await delDraft(it.id);
+    removed = []; dirty = false;
+    setBar(100);
+    log('פורסם. תוך דקה-שתיים גיטהאב יעדכן את האתר. בטלפון: לרענן את הדף.');
+    $('#pubBtn').textContent = 'פרסום לגיטהאב';
+    await load();
+  } catch (e){
+    log('נעצר: ' + e.message);
+  }
+  $('#pubBtn').disabled = false;
+});
+
+$('#helpBtn').addEventListener('click', () => $('#help').classList.toggle('on'));
+window.addEventListener('beforeunload', e => { if (dirty){ e.preventDefault(); e.returnValue = ''; } });
+
+openDB().then(d => { db = d; load(); if (!localStorage.getItem('seen')){ $('#help').classList.add('on'); localStorage.setItem('seen','1'); } });
+</script>
+</body>
+</html>

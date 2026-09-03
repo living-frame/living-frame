@@ -1,0 +1,9 @@
+{
+  "name": "מסגרת חיה",
+  "short_name": "מסגרת חיה",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#17111f",
+  "theme_color": "#17111f",
+  "icons": [{ "src": "logo.png", "sizes": "420x468", "type": "image/png", "purpose": "any" }]
+}

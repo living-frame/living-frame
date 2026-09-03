@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>מסגרת חיה</title>
+<link rel="manifest" href="./app.webmanifest">
+<meta name="theme-color" content="#17111f">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+<style>
+:root{ --ink:#17111f; --ink2:#241b31; --gold:#d6a22e; --bone:#f4efe4; --green:#79b627; --blue:#1d86c9; }
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--ink);
+  font-family:"Assistant",system-ui,sans-serif;color:var(--bone);-webkit-tap-highlight-color:transparent}
+a-scene{position:fixed;inset:0}
+#hidden{display:none}
+
+#start{position:fixed;inset:0;z-index:50;overflow:auto;
+  background:radial-gradient(120% 80% at 50% 0%, #2a1f3a 0%, var(--ink) 60%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center}
+#start img{width:112px;margin-bottom:8px}
+#start h1{font-family:"Frank Ruhl Libre",serif;font-size:33px;font-weight:900;margin:0}
+#start p{max-width:31ch;color:#cabfd2;font-weight:300;font-size:16px;margin:8px 0 0;line-height:1.6}
+#go{margin-top:24px;background:var(--gold);color:#221703;border:0;border-radius:14px;
+  padding:15px 40px;font-family:"Assistant";font-weight:800;font-size:18px}
+#go[disabled]{opacity:.45}
+#prefetch{margin-top:12px;background:transparent;border:1px solid #4a3a5c;color:#cabfd2;
+  border-radius:12px;padding:10px 20px;font-family:"Assistant";font-size:14.5px;font-weight:600}
+#err{color:#f3a273;font-size:14px;margin-top:14px;max-width:32ch;min-height:1.2em}
+#count{font-size:13px;color:#8d8194;margin-top:18px}
+
+#hud{position:fixed;inset:0;z-index:20;pointer-events:none;display:none}
+#top{position:absolute;top:0;left:0;right:0;padding:calc(14px + env(safe-area-inset-top)) 14px 14px;
+  display:flex;justify-content:space-between;gap:10px}
+.btn{pointer-events:auto;background:rgba(16,11,22,.6);border:1px solid rgba(255,255,255,.18);
+  color:#fff;border-radius:999px;padding:8px 14px;font-family:"Assistant";font-size:14px;font-weight:600;backdrop-filter:blur(6px)}
+#state{position:absolute;left:0;right:0;bottom:calc(18px + env(safe-area-inset-bottom));padding:0 14px}
+#scanmsg{text-align:center;font-size:13px;color:#efe7dd;text-shadow:0 1px 8px #000;margin-bottom:10px}
+.card{pointer-events:auto;background:rgba(20,14,26,.82);border:1px solid rgba(214,162,46,.45);
+  border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(8px)}
+.dot{width:9px;height:9px;border-radius:99px;background:#6b5f77;flex:0 0 auto;transition:.2s}
+.card.on .dot{background:var(--green);box-shadow:0 0 9px var(--green)}
+.card.load .dot{background:var(--blue);box-shadow:0 0 9px var(--blue)}
+.card b{font-family:"Frank Ruhl Libre",serif;font-size:17px;color:var(--gold);display:block;line-height:1.2}
+.card small{font-size:11.5px;color:#c9bdb2;display:block}
+.card .more{margin-inline-start:auto;font-size:12px;color:#9b8fa6}
+#dlbar{height:3px;background:#3a2e4a;border-radius:9px;margin-top:8px;overflow:hidden;display:none}
+#dlbar i{display:block;height:100%;width:0;background:var(--blue);transition:width .2s}
+
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--ink2);
+  border-radius:20px 20px 0 0;padding:14px 18px calc(24px + env(safe-area-inset-bottom));
+  border-top:1px solid #443552;transform:translateY(110%);transition:transform .25s ease}
+#sheet.open{transform:none}
+#sheet .grab{width:38px;height:4px;border-radius:9px;background:#544364;margin:0 auto 12px}
+#sheet h2{font-family:"Frank Ruhl Libre",serif;font-size:22px;margin:0 0 4px}
+#sheet p{font-size:14.5px;color:#c3b8cb;font-weight:300;margin:3px 0;line-height:1.6}
+#sheet .line{display:flex;justify-content:space-between;font-size:13px;color:#9b8fa6;
+  border-top:1px solid #3b2e4a;padding-top:9px;margin-top:12px}
+@media (prefers-reduced-motion:reduce){ #sheet{transition:none} }
+</style>
+</head>
+<body>
+
+<div id="start">
+  <img src="./logo.png" alt="לוגו בית הכנסת">
+  <h1>מסגרת חיה</h1>
+  <p>כוונו את הטלפון לתמונה על הקיר. ההנפשה תיפתח בתוך המסגרת ותישאר צמודה אליה.</p>
+  <button id="go" disabled>טוען…</button>
+  <button id="prefetch" style="display:none">שמירת כל ההנפשות במכשיר</button>
+  <div id="err"></div>
+  <div id="count"></div>
+</div>
+
+<div id="hud">
+  <div id="top">
+    <button class="btn" id="sound">🔇 קול כבוי</button>
+    <button class="btn" id="fit">מילוי מסגרת</button>
+  </div>
+  <div id="state">
+    <div id="scanmsg">מחפש תמונה מוכרת…</div>
+    <div class="card" id="card">
+      <span class="dot"></span>
+      <div style="min-width:0">
+        <b id="ctitle">מסגרת חיה</b>
+        <small id="csub">לא נעול</small>
+      </div>
+      <span class="more">פרטים ›</span>
+    </div>
+    <div id="dlbar"><i></i></div>
+  </div>
+</div>
+
+<div id="sheet">
+  <div class="grab"></div>
+  <h2 id="stitle"></h2>
+  <p id="sded"></p>
+  <div class="line"><span id="sloc"></span><span id="sdate"></span></div>
+</div>
+
+<div id="hidden"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+
+/* ---------- מטמון קליפים במכשיר ---------- */
+let db = null;
+function openDB(){
+  return new Promise((res) => {
+    const r = indexedDB.open('living-frame-media', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('clips');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => res(null);
+  });
+}
+const key = (it) => it.id + '@' + (it.rev || '0');
+let cdnBase = './';
+const mediaURL = (p) => /^https?:/i.test(p) ? p : (cdnBase + p);
+function idbGet(k){
+  return new Promise(res => {
+    if (!db) return res(null);
+    const q = db.transaction('clips').objectStore('clips').get(k);
+    q.onsuccess = () => res(q.result || null);
+    q.onerror = () => res(null);
+  });
+}
+function idbPut(k, blob){
+  return new Promise(res => {
+    if (!db) return res();
+    const t = db.transaction('clips', 'readwrite');
+    t.objectStore('clips').put(blob, k);
+    t.oncomplete = res; t.onerror = res;
+  });
+}
+function idbKeys(){
+  return new Promise(res => {
+    if (!db) return res([]);
+    const q = db.transaction('clips').objectStore('clips').getAllKeys();
+    q.onsuccess = () => res(q.result || []); q.onerror = () => res([]);
+  });
+}
+async function idbClean(valid){
+  const ks = await idbKeys();
+  const gone = ks.filter(k => !valid.includes(k));
+  if (!gone.length || !db) return;
+  const t = db.transaction('clips', 'readwrite');
+  gone.forEach(k => t.objectStore('clips').delete(k));   // גרסאות ישנות של קליפים שהוחלפו
+}
+
+/* הורדה עם התקדמות, ואז שמירה במכשיר */
+async function fetchClip(it, onProgress){
+  const res = await fetch(mediaURL(it.video) + (it.rev ? '?v=' + it.rev : ''), { cache: 'no-store' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const total = +res.headers.get('content-length') || 0;
+  if (!res.body || !total) return await res.blob();
+  const reader = res.body.getReader();
+  const chunks = []; let got = 0;
+  for (;;){
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value); got += value.length;
+    if (onProgress) onProgress(got / total);
+  }
+  return new Blob(chunks, { type: 'video/mp4' });
+}
+
+const ready = {};
+async function ensureClip(i, onProgress){
+  if (ready[i]) return true;
+  const it = items[i], k = key(it);
+  let blob = await idbGet(k);
+  if (!blob){
+    blob = await fetchClip(it, onProgress);
+    await idbPut(k, blob);
+  }
+  vid(i).src = URL.createObjectURL(blob);
+  ready[i] = true;
+  return false;   // false = לא היה שמור, כלומר הורד עכשיו
+}
+
+/* ---------- התאמת הווידאו למסגרת ---------- */
+AFRAME.registerComponent('fit-video', {
+  schema: { vid: {type:'string'}, ratio: {type:'number', default:1} },
+  init(){ this.done = false; },
+  tick(){
+    if (this.done) return;
+    const mesh = this.el.getObject3D('mesh');
+    const v = document.querySelector(this.data.vid);
+    if (!mesh || !mesh.material || !mesh.material.map || !v || !v.videoWidth) return;
+    const map = mesh.material.map;
+    const planeAspect = 1 / this.data.ratio, videoAspect = v.videoWidth / v.videoHeight;
+    if (window.FIT_MODE === 'stretch'){ map.repeat.set(1,1); map.offset.set(0,0); }
+    else if (videoAspect > planeAspect){ const r = planeAspect/videoAspect; map.repeat.set(r,1); map.offset.set((1-r)/2,0); }
+    else { const r = videoAspect/planeAspect; map.repeat.set(1,r); map.offset.set(0,(1-r)/2); }
+    map.needsUpdate = true; this.done = true;
+  },
+  refresh(){ this.done = false; }
+});
+window.FIT_MODE = 'cover';
+
+/* ---------- טעינה ---------- */
+const FALLBACK = { rev: '0', items: [{ id:'lion', rev:'0', title:'יהודה', location:'אולם ראשי',
+  date:'כ׳ אדר תשע״ג', dedication:'הוקדש לעילוי נשמת שמעון שמש בן רחל ויוסף ז״ל',
+  image:'media/lion.jpg', video:'media/lion.mp4', w:914, h:1280 }]};
+
+let items = [], locked = -1, scene = null, manifestRev = '0';
+const vid = (i) => document.querySelector('#v' + i);
+
+(async function boot(){
+  db = await openDB();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+  try {
+    const m = await (await fetch('./manifest.json', { cache: 'no-store' })).json();
+    items = m.items; manifestRev = m.rev || m.updated || '0';
+    if (m.cdn) cdnBase = m.cdn.endsWith('/') ? m.cdn : m.cdn + '/';
+  } catch (e) { items = FALLBACK.items; }
+
+  await idbClean(items.map(key));
+
+  const hidden = $('#hidden');
+  items.forEach((it, i) => {
+    const v = document.createElement('video');
+    v.id = 'v' + i; v.loop = true; v.muted = true; v.preload = 'none';
+    v.setAttribute('playsinline',''); v.setAttribute('webkit-playsinline','');
+    hidden.appendChild(v);            // בלי src — הקובץ יורד רק כשהתמונה מזוהה
+  });
+
+  const targets = items.map((it, i) => {
+    const ratio = (it.h / it.w).toFixed(4);
+    return `<a-entity class="target" data-i="${i}" mindar-image-target="targetIndex: ${i}">
+      <a-video src="#v${i}" width="1" height="${ratio}" position="0 0 0"
+               fit-video="vid: #v${i}; ratio: ${ratio}"></a-video></a-entity>`;
+  }).join('');
+
+  document.body.insertAdjacentHTML('beforeend',
+    `<a-scene id="scene"
+      mindar-image="imageTargetSrc: ./targets.mind?v=${encodeURIComponent(manifestRev)}; autoStart: false;
+                    uiScanning: no; uiLoading: no; uiError: no;
+                    warmupTolerance: 1; missTolerance: 6; filterMinCF: 0.0005; filterBeta: 500"
+      color-space="sRGB" embedded renderer="colorManagement: true, precision: medium"
+      vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+      <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false"></a-camera>
+      ${targets}
+    </a-scene>`);
+
+  scene = $('#scene');
+  document.querySelectorAll('.target').forEach(el => {
+    const i = +el.dataset.i;
+    el.addEventListener('targetFound', () => onFound(i));
+    el.addEventListener('targetLost',  () => onLost(i));
+  });
+
+  const savedKeys = await idbKeys();
+  const savedCount = items.filter(it => savedKeys.includes(key(it))).length;
+  $('#count').textContent = `${items.length} תמונות במאגר · ${savedCount} הנפשות כבר שמורות במכשיר`;
+  if (savedCount < items.length) $('#prefetch').style.display = 'inline-block';
+  $('#go').disabled = false;
+  $('#go').textContent = 'פתיחת המצלמה';
+})();
+
+/* ---------- מעקב ---------- */
+async function onFound(i){
+  locked = i;
+  $('#card').classList.add('on');
+  $('#scanmsg').style.display = 'none';
+  $('#ctitle').textContent = items[i].title || 'תמונה ' + (i+1);
+
+  if (!ready[i]){
+    $('#card').classList.add('load');
+    $('#csub').textContent = 'מוריד את ההנפשה…';
+    $('#dlbar').style.display = 'block';
+    try {
+      await ensureClip(i, p => $('#dlbar i').style.width = (p*100).toFixed(0) + '%');
+    } catch (e) {
+      $('#csub').textContent = 'ההנפשה לא נטענה. יש חיבור לאינטרנט?';
+      vid(i).src = mediaURL(items[i].video);   // ניסיון אחרון: ניגון ישיר מהרשת
+    }
+    $('#dlbar').style.display = 'none';
+    $('#card').classList.remove('load');
+  }
+  if (locked === i) vid(i).play().catch(()=>{});
+}
+function onLost(i){
+  if (locked === i) locked = -1;
+  $('#card').classList.remove('on');
+  $('#scanmsg').style.display = 'block';
+  $('#scanmsg').textContent = 'התמונה יצאה מהפריים';
+  vid(i).pause();
+  $('#csub').textContent = 'מושהה · ' + vid(i).currentTime.toFixed(1) + ' שניות';
+}
+setInterval(() => {
+  if (locked < 0 || !ready[locked]) return;
+  const v = vid(locked);
+  $('#csub').textContent = 'מנגן · ' + v.currentTime.toFixed(1) + ' מתוך ' +
+    (v.duration ? v.duration.toFixed(1) : '—') + ' שניות';
+}, 250);
+
+/* ---------- כפתורים ---------- */
+$('#go').addEventListener('click', async () => {
+  $('#err').textContent = '';
+  try {
+    const v0 = vid(0);
+    if (v0){ v0.muted = true; await v0.play().catch(()=>{}); v0.pause(); }  // פתיחת ניגון באייפון
+    await scene.systems['mindar-image-system'].start();
+    $('#start').style.display = 'none';
+    $('#hud').style.display = 'block';
+  } catch (e) {
+    $('#err').textContent = 'המצלמה לא נפתחה. צריך כתובת מאובטחת (https) ואישור גישה למצלמה. ' + (e && e.message ? e.message : '');
+  }
+});
+
+$('#prefetch').addEventListener('click', async (e) => {
+  const btn = e.target; btn.disabled = true;
+  for (let i = 0; i < items.length; i++){
+    btn.textContent = `שומר ${i+1} מתוך ${items.length}…`;
+    try { await ensureClip(i, p => btn.textContent = `שומר ${i+1} מתוך ${items.length} · ${(p*100).toFixed(0)}%`); }
+    catch (err) { btn.textContent = 'ההורדה נכשלה. אפשר לנסות שוב מאוחר יותר.'; btn.disabled = false; return; }
+  }
+  btn.textContent = 'הכול שמור במכשיר';
+  $('#count').textContent = `${items.length} תמונות במאגר · ${items.length} הנפשות שמורות במכשיר`;
+});
+
+$('#sound').addEventListener('click', (e) => {
+  const on = items.some((_, i) => !vid(i).muted);
+  items.forEach((_, i) => vid(i).muted = on);
+  e.target.textContent = on ? '🔇 קול כבוי' : '🔊 קול פועל';
+  if (!on && locked >= 0) vid(locked).play().catch(()=>{});
+});
+
+$('#fit').addEventListener('click', (e) => {
+  window.FIT_MODE = window.FIT_MODE === 'cover' ? 'stretch' : 'cover';
+  e.target.textContent = window.FIT_MODE === 'cover' ? 'מילוי מסגרת' : 'מתיחה מלאה';
+  document.querySelectorAll('[fit-video]').forEach(el => el.components['fit-video'].refresh());
+});
+
+$('#card').addEventListener('click', () => {
+  if (locked < 0) return;
+  const it = items[locked];
+  $('#stitle').textContent = it.title || '';
+  $('#sded').textContent = it.dedication || '';
+  $('#sloc').textContent = it.location || '';
+  $('#sdate').textContent = it.date || '';
+  $('#sheet').classList.add('open');
+});
+$('#sheet').addEventListener('click', () => $('#sheet').classList.remove('open'));
+</script>
+</body>
+</html>

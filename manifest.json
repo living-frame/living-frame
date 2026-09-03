@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "rev": "seed",
+  "updated": "2026-09-03",
+  "items": [
+    {
+      "index": 0,
+      "id": "lion",
+      "rev": "seed",
+      "title": "יהודה",
+      "location": "אולם ראשי",
+      "date": "כ׳ אדר תשע״ג",
+      "dedication": "הוקדש לעילוי נשמת שמעון שמש בן רחל ויוסף ז״ל",
+      "image": "media/lion.jpg",
+      "video": "media/lion.mp4",
+      "w": 914,
+      "h": 1280,
+      "q": 72
+    }
+  ]
+}
