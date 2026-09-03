@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "rev": "mtm2vdao",
+  "rev": "mtm48685",
   "updated": "2026-09-03",
   "cdn": "",
   "items": [
@@ -31,6 +31,20 @@
       "w": 914,
       "h": 1280,
       "q": 74
+    },
+    {
+      "index": 2,
+      "id": "itmtm47z4n",
+      "rev": "mtm48685",
+      "title": "נפתלי",
+      "location": "אולם ראשי - קיר צפוני",
+      "date": "כ\"ד חשוון תשע\"ו",
+      "dedication": "לעילוי נשמת בחירה בת כדייה ז\"ל",
+      "image": "media/itmtm47z4n.jpg",
+      "video": "media/itmtm47z4n.mp4",
+      "w": 914,
+      "h": 1280,
+      "q": 75
     }
   ]
 }
