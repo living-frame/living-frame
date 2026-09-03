@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>מסך גבאי — מסגרת חיה</title>
 <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js"></script>
 <style>
 :root{
   --ink:#17111f; --ink2:#241b31; --ink3:#2f2440; --line:#3b2e4a;
@@ -107,7 +106,7 @@ input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
   <div>
     <h1>מסך גבאי</h1>
     <div class="sub">כל התוכן יושב בגיטהאב. המסך הזה כותב אליו.</div>
-    <div class="sub" style="color:#6f6480">גרסה 1.0.2 · יוצא ע״י אמיר כהן</div>
+    <div class="sub" style="color:#6f6480">גרסה 1.0.3 · יוצא ע״י אמיר כהן</div>
   </div>
   <div class="sp">
     <button class="small ghost" id="helpBtn">איך זה עובד</button>
@@ -430,12 +429,28 @@ $('#clearBtn').addEventListener('click', resetForm);
 const loadImg = blob => new Promise((res, rej) => {
   const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(blob);
 });
-function compilerReady(){
-  if (window.MINDAR && window.MINDAR.IMAGE && window.MINDAR.IMAGE.Compiler) return true;
-  log('שגיאה: ספריית ההידור לא נטענה. צריך חיבור לאינטרנט.'); return false;
+/* mind-ar מפורסם כמודול ES. תג <script> רגיל לא מריץ אותו, ולכן טוענים בייבוא דינמי. */
+let CompilerCls = null;
+async function loadCompiler(){
+  if (CompilerCls) return CompilerCls;
+  if (window.MINDAR && window.MINDAR.IMAGE && window.MINDAR.IMAGE.Compiler)
+    return (CompilerCls = window.MINDAR.IMAGE.Compiler);
+  const urls = [
+    'https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js',
+    'https://unpkg.com/mind-ar@1.2.5/dist/mindar-image.prod.js'
+  ];
+  for (const u of urls){
+    try {
+      const m = await import(u);
+      CompilerCls = m.Compiler || (window.MINDAR && window.MINDAR.IMAGE && window.MINDAR.IMAGE.Compiler);
+      if (CompilerCls){ log('מנוע ההידור נטען.'); return CompilerCls; }
+    } catch (e){ log('טעינה נכשלה מ-' + new URL(u).hostname + ' — מנסה מקור חלופי'); }
+  }
+  throw new Error('לא הצלחתי לטעון את מנוע ההידור. צריך חיבור לאינטרנט.');
 }
 async function compile(images, onProgress){
-  const c = new window.MINDAR.IMAGE.Compiler();
+  const C = await loadCompiler();
+  const c = new C();
   const data = await c.compileImageTargets(images, onProgress);
   return { buffer: c.exportData(), data };
 }
@@ -448,7 +463,6 @@ function badge(q){
 }
 
 $('#qualityBtn').addEventListener('click', async () => {
-  if (!compilerReady()) return;
   $('#qualityBtn').disabled = true; log('בודק את התמונה…'); setBar(2);
   try {
     const { data } = await compile([await loadImg(imgFile)], p => setBar(p));
@@ -566,7 +580,6 @@ async function ghDelete(path){
 $('#pubBtn').addEventListener('click', async () => {
   if (!connected()){ log('צריך להתחבר לריפו קודם (חלק "הריפו" למעלה).'); return; }
   if (!working.length){ log('אין מה לפרסם.'); return; }
-  if (!compilerReady()) return;
   $('#pubBtn').disabled = true;
   const rev = Date.now().toString(36);
 
