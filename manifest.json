@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "rev": "mtm7kmal",
+  "rev": "mtm7unid",
   "updated": "2026-09-04",
   "cdn": "",
   "items": [
@@ -87,6 +87,20 @@
       "w": 914,
       "h": 1280,
       "q": 50
+    },
+    {
+      "index": 6,
+      "id": "itmtm7ufpj",
+      "rev": "mtm7unid",
+      "title": "יששכר",
+      "location": "אולם ראשי - קיר דרומי",
+      "date": "י\"א חשוון תשפ\"ו",
+      "dedication": "הוקדש לעילוי נשמת יאיר בן זכריה ז\"ל",
+      "image": "media/itmtm7ufpj.jpg",
+      "video": "media/itmtm7ufpj.mp4",
+      "w": 914,
+      "h": 1280,
+      "q": 72
     }
   ]
 }
