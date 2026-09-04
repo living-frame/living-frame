@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "rev": "mtm7unid",
+  "rev": "mtm8e7we",
   "updated": "2026-09-04",
   "cdn": "",
   "items": [
@@ -101,6 +101,20 @@
       "w": 914,
       "h": 1280,
       "q": 72
+    },
+    {
+      "index": 7,
+      "id": "itmtm8e468",
+      "rev": "mtm8e7we",
+      "title": "שמעון",
+      "location": "אולם ראשי - קיר צפוני",
+      "date": "כ\"ח אב תשע\"ט",
+      "dedication": "הוקדש לעילוי נשמת מאיר בן מריים ומנשה ז\"ל",
+      "image": "media/itmtm8e468.jpg",
+      "video": "media/itmtm8e468.mp4",
+      "w": 914,
+      "h": 1280,
+      "q": 74
     }
   ]
 }
