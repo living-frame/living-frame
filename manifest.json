@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "rev": "mtm6f251",
-  "updated": "2026-09-03",
+  "rev": "mtm7kmal",
+  "updated": "2026-09-04",
   "cdn": "",
   "items": [
     {
@@ -59,6 +59,34 @@
       "w": 914,
       "h": 1280,
       "q": 59
+    },
+    {
+      "index": 4,
+      "id": "itmtm7hi7e",
+      "rev": "mtm7kmal",
+      "title": "בנימין",
+      "location": "אולם ראשי - קיר דרומי",
+      "date": "",
+      "dedication": "הוקדש לעילוי נשמת דבורה בת חיים ועליזה בת מזל\nולהצלחת צילה וישעיה הינדי ובני ביתו",
+      "image": "media/itmtm7hi7e.jpg",
+      "video": "media/itmtm7hi7e.mp4",
+      "w": 914,
+      "h": 1280,
+      "q": 77
+    },
+    {
+      "index": 5,
+      "id": "itmtm7kh5v",
+      "rev": "mtm7kmal",
+      "title": "דן",
+      "location": "אולם ראשי - קיר דרומי",
+      "date": "י\"ט חשוון תשנ\"ו",
+      "dedication": "הוקדש לעילוי נשמת צבי עזרא בן ג'ורג'יה ז\"ל",
+      "image": "media/itmtm7kh5v.jpg",
+      "video": "media/itmtm7kh5v.mp4",
+      "w": 914,
+      "h": 1280,
+      "q": 50
     }
   ]
 }
