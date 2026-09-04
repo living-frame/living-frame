@@ -128,7 +128,7 @@ body.in .wrap{display:block}
   <div>
     <h1>מסך גבאי</h1>
     <div class="sub">כל התוכן יושב בגיטהאב. המסך הזה כותב אליו.</div>
-    <div class="sub" style="color:#6f6480">גרסה 1.0.4 · נוצר ע״י אמיר כהן</div>
+    <div class="sub" style="color:#6f6480">גרסה 1.0.5 · נוצר ע״י אמיר כהן</div>
   </div>
   <div class="sp">
     <button class="small ghost" id="helpBtn">איך זה עובד</button>
@@ -176,6 +176,9 @@ body.in .wrap{display:block}
     <li><b>אחסון חיצוני</b> — Cloudflare R2, ‏Supabase Storage או Backblaze B2. כולם מאפשרים להגדיר CORS. ממלאים כתובת בסיס בהגדרות, או מדביקים קישור מלא לכל פריט בנפרד.</li>
   </ul>
   <p>לפני שמחפשים אחסון — כדאי לבדוק את משקל הסרטון. קליפ של 10 שניות ב-720 על 1280 צריך לשקול מגה עד שניים. אם הוא שוקל שישה, הוא פשוט מקודד בבזבזנות, והמסך יציע לך את שורת הדחיסה.</p>
+
+  <h3>שתי תמונות באותו פריים</h3>
+  <p>אם המצלמה רואה שתי תמונות יחד, שתיהן מתנגנות במקביל, כל אחת עם ההנפשה שלה. המספר נשמר בשדה <code>maxTrack</code> שב-manifest, וברירת המחדל היא שתיים — מעבר לזה הטלפון מתחיל להתאמץ והתנועה נעשית קופצנית. אפשר לשנות ידנית בקובץ למי שרוצה לנסות שלוש.</p>
 
   <h3>אבטחה — מה מוגן ומה לא</h3>
   <p>הדף הזה יושב באתר ציבורי, וכל מי שיודע את הכתובת יכול לפתוח אותו ולקרוא את הקוד. לכן חשוב להבין מה בדיוק מגן על מה:</p>
@@ -738,6 +741,7 @@ $('#pubBtn').addEventListener('click', async () => {
     // 4. רשימה + קובץ מטרות
     const manifest = {
       version: 2, rev, updated: new Date().toISOString().slice(0,10), cdn: cdnValue(),
+      maxTrack: Math.min(2, working.length),   // כמה תמונות אפשר לנגן בו־זמנית
       items: working.map((it, i) => ({
         index: i, id: it.id, rev: it.rev || rev, title: it.title, location: it.location,
         date: it.date, dedication: it.dedication, image: it.image, video: it.video,
