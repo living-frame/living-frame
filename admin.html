@@ -107,6 +107,7 @@ body.in .wrap{display:block}
 #gate input{max-width:300px;text-align:center}
 #gate button{background:var(--gold);color:#221703;border-color:var(--gold);margin-top:8px;padding:12px 34px;font-size:16px}
 #gerr{color:#f08d92;font-size:14px;min-height:1.2em}
+input.masked{-webkit-text-security:disc;text-security:disc;font-family:ui-monospace,monospace;letter-spacing:.06em}
 </style>
 </head>
 <body>
@@ -128,7 +129,7 @@ body.in .wrap{display:block}
   <div>
     <h1>מסך גבאי</h1>
     <div class="sub">כל התוכן יושב בגיטהאב. המסך הזה כותב אליו.</div>
-    <div class="sub" style="color:#6f6480">גרסה 1.0.5 · נוצר ע״י אמיר כהן</div>
+    <div class="sub" style="color:#6f6480">גרסה 1.0.7 · נוצר ע״י אמיר כהן</div>
   </div>
   <div class="sp">
     <button class="small ghost" id="helpBtn">איך זה עובד</button>
@@ -207,7 +208,13 @@ body.in .wrap{display:block}
     <div><label for="ghBranch">ענף</label><input id="ghBranch" value="main"></div>
   </div>
   <label for="ghToken">טוקן אישי (הרשאת Contents: write)</label>
-  <input id="ghToken" type="password" placeholder="ghp_…">
+  <div style="display:flex;gap:8px;align-items:center">
+    <input id="ghToken" type="text" placeholder="ghp_… או github_pat_…" class="masked"
+           name="github-pat" autocomplete="off" autocorrect="off" autocapitalize="off"
+           spellcheck="false" data-lpignore="true" data-1p-ignore>
+    <button type="button" class="small ghost" id="ghPeek" style="flex:0 0 auto">הצגה</button>
+  </div>
+  <div id="tokinfo" style="font-size:12.5px;color:var(--dim);margin-top:6px"></div>
   <label for="mediaMode">מאיפה הטלפונים ימשכו את הסרטונים</label>
   <select id="mediaMode" style="width:100%;background:var(--ink2);border:1px solid var(--line);border-radius:10px;color:var(--bone);padding:10px 12px;font-family:Assistant;font-size:15px">
     <option value="pages">מגיטהאב Pages — הכי פשוט, מתאים עד כ-100 סרטונים</option>
@@ -361,6 +368,7 @@ async function doLogin(){
     }
   }
   if (gh.token) $('#ghToken').value = gh.token;
+  showTokenInfo();
 
   db = await openDB();
   load();
@@ -405,21 +413,46 @@ const base = () => (gh.owner && gh.repo) ? rawBase() : './';
 $('#ghSave').addEventListener('click', async () => {
   ['owner','repo','branch'].forEach(k => { gh[k] = $(F[k]).value.trim(); localStorage.setItem('gh_'+k, gh[k]); });
   gh.token = $('#ghToken').value.trim();
+  showTokenInfo();
   localStorage.removeItem('gh_token');                       // אף פעם לא בגלוי
   if (gh.token && SESSION_PW) localStorage.setItem('gh_token_enc', await sealToken(SESSION_PW, gh.token));
   $('#conn').innerHTML = '';
   if (!connected()){ $('#conn').innerHTML = '<div class="msg warn">חסרים פרטים. בלי טוקן אפשר רק לצפות.</div>'; return; }
+  if (!/^(ghp_|github_pat_|gho_|ghs_)/.test(gh.token)){
+    $('#conn').innerHTML = '<div class="msg bad">מה שבשדה אינו נראה כמו טוקן של גיטהאב (' + gh.token.length +
+      ' תווים). לחצו "הצגה" כדי לראות מה יושב שם, מחקו והדביקו את הטוקן מחדש.</div>';
+    return;
+  }
   try {
     const r = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}`, { headers: ghHeaders() });
-    if (!r.ok) throw new Error(r.status === 404 ? 'הריפו לא נמצא, או שלטוקן אין גישה אליו' : 'שגיאה ' + r.status);
+    if (!r.ok) throw new Error(
+      r.status === 401 ? 'הטוקן נדחה (401). הוא פג תוקף, בוטל, או שהשדה מולא אוטומטית בסיסמת הכניסה במקום בטוקן. ' +
+                         'לחצו "הצגה" כדי לראות מה באמת יושב בשדה.'
+    : r.status === 403 ? 'אין הרשאה (403). לטוקן חסרה הרשאת Contents: Read and write על הריפו הזה.'
+    : r.status === 404 ? 'הריפו לא נמצא, או שהטוקן לא כולל אותו ב-Only select repositories.'
+    : 'שגיאה ' + r.status);
     const j = await r.json();
     $('#conn').innerHTML = `<div class="msg ok">מחובר ל־${esc(j.full_name)}. ${j.private ? 'שים לב: ריפו פרטי — GitHub Pages החינמי לא יפרסם אותו.' : ''}</div>`;
     load();
   } catch (e){ $('#conn').innerHTML = `<div class="msg bad">${esc(e.message)}</div>`; }
 });
+function showTokenInfo(){
+  const t = gh.token, el = $('#tokinfo');
+  if (!t){ el.textContent = 'אין טוקן שמור.'; el.style.color = 'var(--dim)'; return; }
+  const shape = /^(ghp_|github_pat_|gho_|ghs_)/.test(t);
+  el.textContent = `בשדה יושב: ${t.slice(0,7)}…${t.slice(-4)} · ${t.length} תווים` +
+    (shape ? '' : ' — זה לא נראה כמו טוקן של גיטהאב. ייתכן שהדפדפן מילא כאן סיסמה.');
+  el.style.color = shape ? 'var(--dim)' : '#f3a273';
+}
+$('#ghPeek').addEventListener('click', () => {
+  const f = $('#ghToken');
+  f.classList.toggle('masked');
+  $('#ghPeek').textContent = f.classList.contains('masked') ? 'הצגה' : 'הסתרה';
+});
+
 $('#ghForget').addEventListener('click', () => {
   localStorage.removeItem('gh_token'); localStorage.removeItem('gh_token_enc');
-  gh.token = ''; $('#ghToken').value = '';
+  gh.token = ''; $('#ghToken').value = ''; showTokenInfo();
   $('#conn').innerHTML = '<div class="msg info">הטוקן נמחק מהדפדפן.</div>';
 });
 const ghHeaders = () => ({ Authorization: 'Bearer ' + gh.token, Accept: 'application/vnd.github+json',
