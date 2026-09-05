@@ -129,7 +129,7 @@ input.masked{-webkit-text-security:disc;text-security:disc;font-family:ui-monosp
   <div>
     <h1>מסך גבאי</h1>
     <div class="sub">כל התוכן יושב בגיטהאב. המסך הזה כותב אליו.</div>
-    <div class="sub" style="color:#6f6480">גרסה 1.0.7 · נוצר ע״י אמיר כהן</div>
+    <div class="sub" style="color:#6f6480">גרסה 1.0.8 · נוצר ע״י אמיר כהן</div>
   </div>
   <div class="sp">
     <button class="small ghost" id="helpBtn">איך זה עובד</button>
@@ -177,6 +177,14 @@ input.masked{-webkit-text-security:disc;text-security:disc;font-family:ui-monosp
     <li><b>אחסון חיצוני</b> — Cloudflare R2, ‏Supabase Storage או Backblaze B2. כולם מאפשרים להגדיר CORS. ממלאים כתובת בסיס בהגדרות, או מדביקים קישור מלא לכל פריט בנפרד.</li>
   </ul>
   <p>לפני שמחפשים אחסון — כדאי לבדוק את משקל הסרטון. קליפ של 10 שניות ב-720 על 1280 צריך לשקול מגה עד שניים. אם הוא שוקל שישה, הוא פשוט מקודד בבזבזנות, והמסך יציע לך את שורת הדחיסה.</p>
+
+  <h3>אורך ומשקל של סרטון</h3>
+  <p>המגבלה היא דקה וחצי ועד 30 מגה לקובץ. מעבר לזה המסך חוסם את ההוספה.</p>
+  <p>מה שקובע בפועל הוא לא האורך אלא קצב הקידוד. סרטון לטלפון מסתפק בכ-1.4 מגהביט לשנייה, ובקצב הזה
+  דקה וחצי שוקלת כ-15 מגה. אם המסך מתריע על קצב גבוה — הקובץ פשוט קודד בבזבזנות, ודחיסה תוריד אותו
+  לכשליש בלי הבדל נראה לעין. שורת הדחיסה מופיעה בהתראה עצמה, עם הרזולוציה של התמונה כבר בפנים.</p>
+  <p>שימו לב שסרטון כבד יורד לטלפון בפעם הראשונה שהתמונה מזוהה. 15 מגה ברשת של בית כנסת זו המתנה
+  מורגשת, ולכן שווה להמליץ למתפללים על "שמירת כל ההנפשות במכשיר" ממסך הפתיחה, בבית.</p>
 
   <h3>שתי תמונות באותו פריים</h3>
   <p>אם המצלמה רואה שתי תמונות יחד, שתיהן מתנגנות במקביל, כל אחת עם ההנפשה שלה. המספר נשמר בשדה <code>maxTrack</code> שב-manifest, וברירת המחדל היא שתיים — מעבר לזה הטלפון מתחיל להתאמץ והתנועה נעשית קופצנית. אפשר לשנות ידנית בקובץ למי שרוצה לנסות שלוש.</p>
@@ -246,7 +254,7 @@ input.masked{-webkit-text-security:disc;text-security:disc;font-family:ui-monosp
       </div>
     </div>
     <div>
-      <div class="drop" id="dropVid"><b>סרטון ההנפשה</b>MP4 · עד כ-8 מגה · באותו יחס כמו התמונה</div>
+      <div class="drop" id="dropVid"><b>סרטון ההנפשה</b>MP4 · עד דקה וחצי · עד 30 מגה · באותו יחס כמו התמונה</div>
       <input type="file" id="fileVid" accept="video/*" hidden>
       <div class="preview" id="pvVid">
         <div class="frame" id="vidFrame"><div class="ov"><video id="vidEl" muted loop playsinline></video></div></div>
@@ -555,18 +563,42 @@ function validate(){
         `התצוגה למעלה מראה מה יישאר. לייצוא מדויק: ${imgDim.w}×${imgDim.h}.`);
     }
   }
-  if (vidFile && vidFile.size > 2.5*1048576 && imgDim){
-    const mb = (vidFile.size/1048576).toFixed(1);
-    add('warn', `הסרטון שוקל ${mb} מגה — כמעט תמיד אפשר לרדת לשליש בלי הבדל נראה לעין. ` +
-      `שורה אחת בטרמינל:<br><code style="display:block;direction:ltr;text-align:left;margin-top:6px;background:#100c17;padding:8px;border-radius:8px;font-size:12.5px">` +
-      `ffmpeg -i in.mp4 -c:v libx264 -crf 26 -preset slow -vf scale=${imgDim.w}:${imgDim.h} -movflags +faststart -c:a aac -b:a 64k out.mp4</code>` +
-      `הסקייל גם מיישר את היחס לתמונה.`);
+  const MB = 1048576, MAX_MB = 30, MAX_SEC = 92;
+  let tooBig = false;
+
+  if (vidFile && vidFile.size > MAX_MB*MB){
+    tooBig = true;
+    add('bad', `הסרטון שוקל ${(vidFile.size/MB).toFixed(1)} מגה, והמגבלה היא ${MAX_MB}. צריך לדחוס לפני ההעלאה.`);
   }
-  if (vidDur > 30) add('warn', 'הסרטון ארוך מ-30 שניות.');
+  if (vidDur > MAX_SEC){
+    tooBig = true;
+    add('bad', `הסרטון נמשך ${vidDur.toFixed(0)} שניות, והמגבלה היא דקה וחצי.`);
+  }
+  if (vidFile && vidFile.size > 20*MB && media.mode === 'jsdelivr'){
+    add('warn', 'ב-jsDelivr יש תקרה של 20 מגה לקובץ. סרטון כבד מזה לא ייטען למתפללים — ' +
+      'או לדחוס, או לעבור ל-Pages בהגדרות למעלה.');
+  }
+
+  // הקצב, ולא המשקל, הוא מה שמסגיר קידוד בזבזני — וזה עובד בכל אורך
+  if (vidFile && vidDur > 0 && imgDim && !tooBig){
+    const mbps = (vidFile.size*8)/(vidDur*1e6);
+    if (mbps > 2){
+      const target = Math.max(900, Math.round(1400));
+      add('warn', `הסרטון מקודד ב-${mbps.toFixed(1)} מגהביט לשנייה — גבוה פי כמה מהנדרש למסך טלפון. ` +
+        `דחיסה תוריד אותו לכשליש בלי הבדל נראה לעין:` +
+        `<code style="display:block;direction:ltr;text-align:left;margin-top:6px;background:#100c17;padding:8px;border-radius:8px;font-size:12.5px">` +
+        `ffmpeg -i in.mp4 -c:v libx264 -crf 26 -preset slow -maxrate ${target}k -bufsize 2M ` +
+        `-vf scale=${imgDim.w}:${imgDim.h} -movflags +faststart -c:a aac -b:a 64k out.mp4</code>` +
+        `ה-scale גם מיישר את היחס לתמונה.`);
+    } else if (vidFile.size > 12*MB){
+      add('warn', `${(vidFile.size/MB).toFixed(1)} מגה — הקידוד סביר, זה פשוט סרטון ארוך. ` +
+        `ההורדה הראשונה בטלפון תיקח כמה שניות. שווה להזכיר למתפללים את "שמירת כל ההנפשות במכשיר" בבית.`);
+    }
+  }
   const ext = $('#extVid').value.trim();
   if (ext && !/^https:\/\//i.test(ext)) add('bad', 'הקישור חייב להתחיל ב-https, אחרת הדפדפן יחסום אותו.');
   if (ext) add('info', 'שים לב: אחסון חיצוני חייב להחזיר Access-Control-Allow-Origin. וואן־דרייב, גוגל דרייב ודרופבוקס לא עושים את זה, והווידאו ייחסם כשהוא נטען כטקסטורה של AR.');
-  $('#addBtn').disabled = !(imgFile && (vidFile || ext));
+  $('#addBtn').disabled = tooBig || !(imgFile && (vidFile || ext));
   $('#qualityBtn').disabled = !imgFile;
 }
 $('#extVid').addEventListener('input', validate);
