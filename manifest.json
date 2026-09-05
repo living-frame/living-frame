@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "rev": "mtm9byed",
-  "updated": "2026-09-04",
+  "rev": "mtoyn3xh",
+  "updated": "2026-09-05",
   "cdn": "",
   "maxTrack": 2,
   "items": [
@@ -116,6 +116,20 @@
       "w": 914,
       "h": 1280,
       "q": 74
+    },
+    {
+      "index": 8,
+      "id": "itmtoymz45",
+      "rev": "mtoyn3xh",
+      "title": "יהודה כהן זדה",
+      "location": "פרטי",
+      "date": "",
+      "dedication": "לעילוי נשמת יהודה כהן זדה בן שמואל וגולשאן",
+      "image": "media/itmtoymz45.jpg",
+      "video": "media/itmtoymz45.mp4",
+      "w": 921,
+      "h": 1458,
+      "q": 88
     }
   ]
 }
