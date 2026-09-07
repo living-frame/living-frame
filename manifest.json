@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "rev": "mtoyn3xh",
-  "updated": "2026-09-05",
+  "rev": "mtr418rm",
+  "updated": "2026-09-07",
   "cdn": "",
   "maxTrack": 2,
   "items": [
@@ -130,6 +130,20 @@
       "w": 921,
       "h": 1458,
       "q": 88
+    },
+    {
+      "index": 9,
+      "id": "itmtqwoc9n",
+      "rev": "mtr418rm",
+      "title": "יוסף",
+      "location": "אולם ראשי - קיר צפוני",
+      "date": "",
+      "dedication": "הוקדש להצלחת ורפואת גבריאל בן דוד ובני ביתו",
+      "image": "media/itmtqwoc9n.jpg",
+      "video": "media/itmtqwoc9n.mp4",
+      "w": 914,
+      "h": 1280,
+      "q": 62
     }
   ]
 }
