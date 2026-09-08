@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "rev": "mtsln3ml",
+  "rev": "mtsm3s4j",
   "updated": "2026-09-08",
   "cdn": "",
   "maxTrack": 2,
@@ -172,6 +172,20 @@
       "w": 2000,
       "h": 1333,
       "q": 87
+    },
+    {
+      "index": 12,
+      "id": "itmtsm3h7b",
+      "rev": "mtsm3s4j",
+      "title": "צילום מסך 2026-09-08 142800",
+      "location": "",
+      "date": "",
+      "dedication": "סבא וסבתא תמיר",
+      "image": "media/itmtsm3h7b.png",
+      "video": "media/itmtsm3h7b.mp4",
+      "w": 663,
+      "h": 743,
+      "q": 46
     }
   ]
 }
