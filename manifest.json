@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "rev": "mtsm3s4j",
-  "updated": "2026-09-08",
+  "rev": "mtv9njum",
+  "updated": "2026-09-10",
   "cdn": "",
   "maxTrack": 2,
   "items": [
@@ -186,6 +186,20 @@
       "w": 663,
       "h": 743,
       "q": 46
+    },
+    {
+      "index": 13,
+      "id": "itmtv9mk4t",
+      "rev": "mtv9njum",
+      "title": "WhatsApp Image 2026-09-10 at 10.47.47",
+      "location": "",
+      "date": "",
+      "dedication": "שנה טובה",
+      "image": "media/itmtv9mk4t.jpg",
+      "video": "media/itmtv9mk4t.mp4",
+      "w": 2048,
+      "h": 1152,
+      "q": 73
     }
   ]
 }
