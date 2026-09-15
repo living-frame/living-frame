@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "rev": "mtvadkju",
-  "updated": "2026-09-10",
+  "rev": "mu32w5uu",
+  "updated": "2026-09-15",
   "cdn": "",
   "maxTrack": 2,
   "items": [
@@ -199,6 +199,20 @@
       "video": "media/itmtvadg4m.mp4",
       "w": 2048,
       "h": 1152,
+      "q": 73
+    },
+    {
+      "index": 14,
+      "id": "itmu32tyrd",
+      "rev": "mu32w5uu",
+      "title": "צילום מסך 2026-09-15 223838",
+      "location": "",
+      "date": "",
+      "dedication": "ברוכים הבאים",
+      "image": "media/itmu32tyrd.png",
+      "video": "media/itmu32tyrd.mp4",
+      "w": 675,
+      "h": 1173,
       "q": 73
     }
   ]
