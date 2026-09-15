@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "rev": "mu32w5uu",
+  "rev": "mu34occh",
   "updated": "2026-09-15",
   "cdn": "",
   "maxTrack": 2,
@@ -203,17 +203,17 @@
     },
     {
       "index": 14,
-      "id": "itmu32tyrd",
-      "rev": "mu32w5uu",
-      "title": "צילום מסך 2026-09-15 223838",
+      "id": "itmu34nslf",
+      "rev": "mu34occh",
+      "title": "צילום מסך 2026-09-15 232730",
       "location": "",
       "date": "",
-      "dedication": "ברוכים הבאים",
-      "image": "media/itmu32tyrd.png",
-      "video": "media/itmu32tyrd.mp4",
-      "w": 675,
-      "h": 1173,
-      "q": 73
+      "dedication": "הרוכים הבאים אלינו",
+      "image": "media/itmu34nslf.png",
+      "video": "media/itmu34nslf.mp4",
+      "w": 672,
+      "h": 1164,
+      "q": 65
     }
   ]
 }
