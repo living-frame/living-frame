@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "rev": "mu34occh",
+  "rev": "mu35dbax",
   "updated": "2026-09-15",
   "cdn": "",
   "maxTrack": 2,
@@ -200,20 +200,6 @@
       "w": 2048,
       "h": 1152,
       "q": 73
-    },
-    {
-      "index": 14,
-      "id": "itmu34nslf",
-      "rev": "mu34occh",
-      "title": "צילום מסך 2026-09-15 232730",
-      "location": "",
-      "date": "",
-      "dedication": "הרוכים הבאים אלינו",
-      "image": "media/itmu34nslf.png",
-      "video": "media/itmu34nslf.mp4",
-      "w": 672,
-      "h": 1164,
-      "q": 65
     }
   ]
 }
